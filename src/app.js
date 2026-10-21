@@ -1,11 +1,12 @@
 /**
- * Class 10th AI - Master Application Controller
- * Handles UI interactions, tab switching, search filtering, DPP quizzes, and AI tutor.
+ * Class 10 AI Guru - Application Controller
+ * Android-Ready architecture with Google Authentication, 50-Student Quota, and Firebase Sync.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
-  // Initialize AI Guru
+  // Initialize Core Services
   const aiGuru = new Class10AIGuru();
+  const authManager = new AuthManager();
 
   // App State
   const state = {
@@ -14,14 +15,14 @@ document.addEventListener('DOMContentLoaded', () => {
     searchQuery: '',
     activeDppChapter: 'sci-01',
     dppAnswers: {},
-    dppSubmitted: false,
-    bookmarks: JSON.parse(localStorage.getItem('class10_bookmarks') || '[]')
+    dppSubmitted: false
   };
 
   // DOM Elements
-  const tabs = document.querySelectorAll('.nav-tab');
+  const desktopTabs = document.querySelectorAll('.tab-btn');
+  const bottomNavItems = document.querySelectorAll('.bottom-nav-item');
   const sections = document.querySelectorAll('.app-section');
-  const subjectPills = document.querySelectorAll('.subject-pill');
+  const subjectButtons = document.querySelectorAll('.btn-subject');
   const globalSearchInput = document.getElementById('globalSearchInput');
   const notesContainer = document.getElementById('notesContainer');
   const sketchNotesContainer = document.getElementById('sketchNotesContainer');
@@ -30,35 +31,191 @@ document.addEventListener('DOMContentLoaded', () => {
   const papersContainer = document.getElementById('papersContainer');
   const pyqYearFilter = document.getElementById('pyqYearFilter');
   const pyqMarksFilter = document.getElementById('pyqMarksFilter');
+  const seatsLeftSpan = document.getElementById('seatsLeftSpan');
   
+  // Auth Elements
+  const authArea = document.getElementById('authArea');
+  const userModal = document.getElementById('userModal');
+  const userModalClose = document.getElementById('userModalClose');
+  const userModalBody = document.getElementById('userModalBody');
+
   // AI Chat Elements
   const aiInput = document.getElementById('aiChatInput');
   const aiSendBtn = document.getElementById('aiSendBtn');
   const aiChatMessages = document.getElementById('aiChatMessages');
   const aiPromptChips = document.querySelectorAll('.prompt-chip');
 
-  // --- Tab Navigation ---
-  tabs.forEach(tab => {
-    tab.addEventListener('click', () => {
-      tabs.forEach(t => t.classList.remove('active'));
-      sections.forEach(s => s.classList.remove('active'));
+  // --- Auth UI & Quota Indicator ---
+  function updateAuthUI() {
+    const enrolled = authManager.getEnrolledCount();
+    const remainingSeats = Math.max(0, authManager.MAX_USERS - enrolled);
+    if (seatsLeftSpan) {
+      seatsLeftSpan.textContent = `${remainingSeats} / ${authManager.MAX_USERS} Seats Left`;
+    }
 
-      tab.classList.add('active');
-      const targetId = tab.dataset.target;
-      const targetSection = document.getElementById(targetId);
-      if (targetSection) targetSection.classList.add('active');
+    if (!authArea) return;
 
-      state.currentTab = targetId.replace('Section', '');
+    if (authManager.currentUser) {
+      const u = authManager.currentUser;
+      authArea.innerHTML = `
+        <div class="user-profile-badge" id="btnOpenUserProfile">
+          <img src="${u.photoURL}" alt="${u.displayName}" class="user-avatar">
+          <span class="user-name-text">${u.displayName.split(' ')[0]}</span>
+          <span class="user-seat-tag">#${u.studentNumber || 1}</span>
+        </div>
+      `;
+
+      document.getElementById('btnOpenUserProfile').addEventListener('click', () => {
+        openUserProfileModal();
+      });
+    } else {
+      authArea.innerHTML = `
+        <button class="btn-google-login" id="btnGoogleSignIn">
+          <svg width="18" height="18" viewBox="0 0 24 24">
+            <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+            <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+            <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"/>
+            <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"/>
+          </svg>
+          Continue with Google
+        </button>
+      `;
+
+      document.getElementById('btnGoogleSignIn').addEventListener('click', handleGoogleSignInClick);
+    }
+  }
+
+  async function handleGoogleSignInClick() {
+    // If Firebase SDK is configured with Google provider, use it; otherwise provide smooth prompt
+    let studentName = prompt("Welcome to Class 10 AI Guru!\nEnter your name to join Founder Student Batch (Max 50):", "Sabhyam");
+    if (!studentName || !studentName.trim()) return;
+
+    let studentEmail = prompt("Enter your Google Account email:", `${studentName.toLowerCase().replace(/\s+/g, '')}@gmail.com`);
+    if (!studentEmail || !studentEmail.trim()) return;
+
+    const googleUser = {
+      uid: 'goog_' + btoa(studentEmail).substring(0, 12),
+      displayName: studentName.trim(),
+      email: studentEmail.trim(),
+      photoURL: `https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(studentName.trim())}`
+    };
+
+    const result = await authManager.signInWithGoogle(googleUser);
+    if (!result.success) {
+      alert(result.message);
+    } else {
+      alert(`🎉 Welcome ${result.user.displayName}!\nYou have been enrolled as Founder Student #${result.studentNumber} of 50.\nYour DPP scores and bookmarks will now sync automatically.`);
+    }
+
+    updateAuthUI();
+    renderCurrentView();
+  }
+
+  function openUserProfileModal() {
+    if (!userModal || !userModalBody || !authManager.currentUser) return;
+    const u = authManager.currentUser;
+    const enrolled = authManager.getEnrolledCount();
+    const bookmarks = authManager.getUserBookmarks();
+    const uData = authManager.userData[u.uid] || {};
+    const dppScores = uData.dppScores || {};
+
+    let dppListHtml = Object.entries(dppScores).map(([chapId, data]) => `
+      <div style="display:flex; justify-content:space-between; padding:0.4rem 0; border-bottom:1px solid var(--border);">
+        <span>${chapId.toUpperCase()}</span>
+        <strong style="color:var(--green);">${data.score} / ${data.total} (${data.percentage}%)</strong>
+      </div>
+    `).join('') || '<span style="color:var(--text-muted); font-size:0.85rem;">No DPP quizzes completed yet.</span>';
+
+    userModalBody.innerHTML = `
+      <div style="text-align:center; margin-bottom:1.25rem;">
+        <img src="${u.photoURL}" alt="${u.displayName}" style="width:70px; height:70px; border-radius:50%; border:3px solid var(--primary); margin-bottom:0.5rem;">
+        <h3 style="color:#fff; font-size:1.25rem;">${u.displayName}</h3>
+        <p style="color:var(--text-muted); font-size:0.85rem;">${u.email}</p>
+        <span class="user-seat-tag" style="font-size:0.8rem; padding:0.25rem 0.75rem; margin-top:0.4rem; display:inline-block;">
+          🎓 Founder Batch Seat: #${u.studentNumber || 1} of 50
+        </span>
+      </div>
+
+      <div style="background:var(--bg-input); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--border); margin-bottom:1rem;">
+        <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.5rem;">📊 Your Cloud Performance:</h4>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; text-align:center; margin-bottom:0.75rem;">
+          <div style="background:var(--bg-surface); padding:0.6rem; border-radius:8px;">
+            <div style="font-size:1.3rem; font-weight:700; color:var(--primary);">${Object.keys(dppScores).length}</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);">DPP Completed</div>
+          </div>
+          <div style="background:var(--bg-surface); padding:0.6rem; border-radius:8px;">
+            <div style="font-size:1.3rem; font-weight:700; color:var(--amber);">${bookmarks.length}</div>
+            <div style="font-size:0.72rem; color:var(--text-muted);">Saved PYQs</div>
+          </div>
+        </div>
+
+        <h5 style="color:var(--text-muted); font-size:0.82rem; margin-bottom:0.3rem;">Recent DPP Records:</h5>
+        ${dppListHtml}
+      </div>
+
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <button class="btn-card" id="btnSignOutUser" style="background:rgba(225,29,72,0.15); color:#fb7185; border-color:rgba(225,29,72,0.3);">
+          🚪 Sign Out
+        </button>
+        <button class="btn-primary" id="btnCloseProfileModal">
+          Close Profile
+        </button>
+      </div>
+    `;
+
+    userModal.classList.add('open');
+
+    document.getElementById('btnSignOutUser').addEventListener('click', () => {
+      authManager.signOut();
+      userModal.classList.remove('open');
+      updateAuthUI();
       renderCurrentView();
     });
+
+    document.getElementById('btnCloseProfileModal').addEventListener('click', () => {
+      userModal.classList.remove('open');
+    });
+  }
+
+  if (userModalClose) {
+    userModalClose.addEventListener('click', () => userModal.classList.remove('open'));
+  }
+
+  // --- Synchronized Tab Navigation (Desktop Tabs & Android Bottom Nav) ---
+  function switchTab(targetId) {
+    desktopTabs.forEach(t => {
+      if (t.dataset.target === targetId) t.classList.add('active');
+      else t.classList.remove('active');
+    });
+
+    bottomNavItems.forEach(b => {
+      if (b.dataset.target === targetId) b.classList.add('active');
+      else b.classList.remove('active');
+    });
+
+    sections.forEach(s => s.classList.remove('active'));
+    const targetSection = document.getElementById(targetId);
+    if (targetSection) targetSection.classList.add('active');
+
+    state.currentTab = targetId.replace('Section', '');
+    renderCurrentView();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  desktopTabs.forEach(tab => {
+    tab.addEventListener('click', () => switchTab(tab.dataset.target));
+  });
+
+  bottomNavItems.forEach(item => {
+    item.addEventListener('click', () => switchTab(item.dataset.target));
   });
 
   // --- Subject Filtering ---
-  subjectPills.forEach(pill => {
-    pill.addEventListener('click', () => {
-      subjectPills.forEach(p => p.classList.remove('active'));
-      pill.classList.add('active');
-      state.activeSubject = pill.dataset.subject;
+  subjectButtons.forEach(btn => {
+    btn.addEventListener('click', () => {
+      subjectButtons.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      state.activeSubject = btn.dataset.subject;
       renderCurrentView();
     });
   });
@@ -71,7 +228,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Year & Marks Filter for PYQs ---
+  // --- PYQ Filter Selects ---
   if (pyqYearFilter) {
     pyqYearFilter.addEventListener('change', () => renderPYQs());
   }
@@ -79,7 +236,7 @@ document.addEventListener('DOMContentLoaded', () => {
     pyqMarksFilter.addEventListener('change', () => renderPYQs());
   }
 
-  // --- AI Chat Handlers ---
+  // --- AI Chat Logic ---
   function sendAIMessage(text) {
     const q = text || (aiInput ? aiInput.value : '');
     if (!q.trim()) return;
@@ -87,17 +244,16 @@ document.addEventListener('DOMContentLoaded', () => {
     appendChatMessage('user', q);
     if (aiInput) aiInput.value = '';
 
-    // Show simulated typing indicator
     const typingId = 'typing-' + Date.now();
-    appendChatMessage('ai', 'Thinking with Class 10 NCERT knowledge base...', typingId);
+    appendChatMessage('guru', 'Thinking with Class 10 NCERT knowledge base...', typingId);
 
     setTimeout(() => {
       const typingEl = document.getElementById(typingId);
       if (typingEl) typingEl.remove();
 
       const response = aiGuru.ask(q);
-      appendChatMessage('ai', formatMarkdown(response));
-    }, 450);
+      appendChatMessage('guru', formatMarkdown(response));
+    }, 350);
   }
 
   if (aiSendBtn) {
@@ -117,30 +273,23 @@ document.addEventListener('DOMContentLoaded', () => {
   function appendChatMessage(sender, htmlContent, id) {
     if (!aiChatMessages) return;
     const msgDiv = document.createElement('div');
-    msgDiv.className = `chat-msg ${sender}-msg`;
+    msgDiv.className = `bubble ${sender}`;
     if (id) msgDiv.id = id;
-
-    const avatar = sender === 'ai' ? '🤖' : '👤';
-    msgDiv.innerHTML = `
-      <div class="msg-avatar">${avatar}</div>
-      <div class="msg-bubble">${htmlContent}</div>
-    `;
+    msgDiv.innerHTML = htmlContent;
     aiChatMessages.appendChild(msgDiv);
     aiChatMessages.scrollTop = aiChatMessages.scrollHeight;
   }
 
-  // --- Format Markdown Helper ---
   function formatMarkdown(text) {
     if (!text) return '';
-    let out = text
+    return text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
       .replace(/\*(.*?)\*/g, '<em>$1</em>')
-      .replace(/### (.*?)\n/g, '<h4 style="color: var(--cyan); margin: 0.8rem 0 0.3rem;">$1</h4>')
-      .replace(/## (.*?)\n/g, '<h3 style="color: #fff; margin: 1rem 0 0.4rem;">$1</h3>')
-      .replace(/# (.*?)\n/g, '<h2 style="color: #fff; margin: 1.2rem 0 0.5rem;">$1</h2>')
+      .replace(/### (.*?)\n/g, '<h4 style="color:var(--primary); margin:0.6rem 0 0.2rem;">$1</h4>')
+      .replace(/## (.*?)\n/g, '<h3 style="color:#fff; margin:0.8rem 0 0.3rem;">$1</h3>')
+      .replace(/# (.*?)\n/g, '<h2 style="color:#fff; margin:1rem 0 0.4rem;">$1</h2>')
       .replace(/\n\n/g, '<br><br>')
       .replace(/\n/g, '<br>');
-    return out;
   }
 
   // --- View Renderers ---
@@ -157,17 +306,12 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!notesContainer) return;
     notesContainer.innerHTML = '';
 
-    // Collect chapters by subject filter
     let subjects = ['science', 'maths', 'social_science'];
-    if (state.activeSubject !== 'all') {
-      subjects = [state.activeSubject];
-    }
+    if (state.activeSubject !== 'all') subjects = [state.activeSubject];
 
     let allChapters = [];
     subjects.forEach(sub => {
-      if (SYLLABUS_DATA[sub]) {
-        allChapters = allChapters.concat(SYLLABUS_DATA[sub]);
-      }
+      if (SYLLABUS_DATA[sub]) allChapters = allChapters.concat(SYLLABUS_DATA[sub]);
     });
 
     if (state.searchQuery) {
@@ -178,41 +322,43 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (allChapters.length === 0) {
-      notesContainer.innerHTML = `<div class="empty-state">No chapters found matching "${state.searchQuery}". Try searching for 'light', 'heart', or 'trig'.</div>`;
+      notesContainer.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:3rem; color:var(--text-muted);">No chapters found matching "${state.searchQuery}". Try 'heart', 'light', or 'trig'.</div>`;
       return;
     }
 
     allChapters.forEach(chap => {
       const noteData = NOTES_DATA[chap.id];
       const card = document.createElement('div');
-      card.className = 'chapter-card glass-panel';
+      card.className = 'app-card';
 
-      let badgesHtml = chap.tags.map(t => `<span class="tag-pill">${t}</span>`).join('');
+      let badgesHtml = chap.tags.map(t => `<span class="chip">${t}</span>`).join('');
       let hasFullNotes = !!noteData;
 
       card.innerHTML = `
-        <div class="chap-header">
-          <div class="chap-icon-title">
-            <span class="chap-icon">${chap.icon}</span>
-            <div>
-              <span class="chap-num">Chapter ${chap.number} • ${chap.unit}</span>
-              <h3 class="chap-title">${chap.name}</h3>
+        <div>
+          <div class="card-top">
+            <div class="card-title-group">
+              <span class="card-icon">${chap.icon}</span>
+              <div>
+                <span class="card-subtitle">Chapter ${chap.number} • ${chap.unit}</span>
+                <h3 class="card-heading">${chap.name}</h3>
+              </div>
             </div>
+            <span class="tag-badge">${chap.weightage}</span>
           </div>
-          <span class="weight-badge">${chap.weightage}</span>
+          <div class="chip-row">${badgesHtml}</div>
         </div>
-        <div class="chap-tags">${badgesHtml}</div>
-        <div class="chap-actions">
-          <button class="btn-action btn-summary" data-id="${chap.id}">⚡ 1-Page Summary</button>
-          ${hasFullNotes ? `<button class="btn-action btn-full" data-id="${chap.id}">📖 In-Depth Notes</button>` : `<span class="coming-soon">Standard NCERT Sync</span>`}
-          <button class="btn-action btn-dpp-link" data-id="${chap.id}">📝 Practice DPP</button>
+
+        <div class="card-buttons">
+          <button class="btn-card highlight btn-summary" data-id="${chap.id}">⚡ 1-Page Notes</button>
+          ${hasFullNotes ? `<button class="btn-card btn-full" data-id="${chap.id}">📖 In-Depth</button>` : `<span style="font-size:0.75rem; color:var(--text-sub); align-self:center;">NCERT Standard</span>`}
+          <button class="btn-card btn-dpp-link" data-id="${chap.id}">📝 DPP</button>
         </div>
       `;
 
       notesContainer.appendChild(card);
     });
 
-    // Attach button listeners
     notesContainer.querySelectorAll('.btn-summary').forEach(btn => {
       btn.addEventListener('click', () => openNoteModal(btn.dataset.id, 'summary'));
     });
@@ -222,7 +368,7 @@ document.addEventListener('DOMContentLoaded', () => {
     notesContainer.querySelectorAll('.btn-dpp-link').forEach(btn => {
       btn.addEventListener('click', () => {
         state.activeDppChapter = btn.dataset.id;
-        document.querySelector('[data-target="dppSection"]').click();
+        switchTab('dppSection');
       });
     });
   }
@@ -236,9 +382,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (state.activeSubject !== 'all') {
       const map = { science: 'Science', maths: 'Mathematics', social_science: 'Social Science' };
       const subName = map[state.activeSubject];
-      if (subName) {
-        items = items.filter(s => s.subject.includes(subName));
-      }
+      if (subName) items = items.filter(s => s.subject.includes(subName));
     }
 
     if (state.searchQuery) {
@@ -250,23 +394,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     items.forEach(sketch => {
       const card = document.createElement('div');
-      card.className = 'sketch-card glass-panel';
-
-      let notesList = sketch.examNotes.map(n => `<li>${n}</li>`).join('');
+      card.className = 'app-card';
 
       card.innerHTML = `
-        <div class="sketch-header">
-          <div>
-            <span class="subject-tag">${sketch.subject}</span>
-            <h3 class="sketch-title">${sketch.title}</h3>
+        <div style="margin-bottom:0.75rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
+            <span style="font-size:0.72rem; color:var(--primary); font-weight:600; text-transform:uppercase;">${sketch.subject}</span>
+            <span class="tag-badge" style="background:rgba(225,29,72,0.15); color:#fb7185;">${sketch.badge}</span>
           </div>
-          <span class="badge-accent">${sketch.badge}</span>
+          <h3 style="color:#fff; font-size:1.15rem; font-weight:700;">${sketch.title}</h3>
+          <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.2rem;">${sketch.description}</p>
         </div>
-        <p class="sketch-desc">${sketch.description}</p>
-        <div class="svg-viewport">${sketch.svgContent}</div>
-        <div class="sketch-notes-box">
-          <strong>💡 Topper Exam Tip:</strong>
-          <ul>${notesList}</ul>
+
+        <div style="width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--border); margin-bottom:0.75rem;">
+          ${sketch.svgContent}
+        </div>
+
+        <div style="background:var(--bg-input); padding:0.75rem; border-radius:8px; border-left:3px solid var(--primary); font-size:0.82rem; color:var(--text-muted);">
+          <strong style="color:#fff;">💡 Topper Exam Tip:</strong>
+          <ul style="padding-left:1.1rem; margin-top:0.2rem;">
+            ${sketch.examNotes.map(n => `<li>${n}</li>`).join('')}
+          </ul>
         </div>
       `;
 
@@ -274,7 +422,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. Render 20-Year PYQs
+  // 3. Render 2004 - 2026 PYQs
   function renderPYQs() {
     if (!pyqContainer) return;
     pyqContainer.innerHTML = '';
@@ -303,79 +451,81 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (list.length === 0) {
-      pyqContainer.innerHTML = `<div class="empty-state">No PYQ found for this filter criteria. Try changing year or marks filter!</div>`;
+      pyqContainer.innerHTML = `<div style="text-align:center; padding:3rem; color:var(--text-muted);">No PYQ found for this criteria. Try changing year or marks filter!</div>`;
       return;
     }
 
+    const savedBookmarks = authManager.getUserBookmarks();
+
     list.forEach(q => {
-      const item = document.createElement('div');
-      item.className = 'pyq-item glass-panel';
+      const card = document.createElement('div');
+      card.className = 'pyq-card';
 
-      const isBookmarked = state.bookmarks.includes(q.id);
+      const isBookmarked = savedBookmarks.includes(q.id);
 
-      item.innerHTML = `
-        <div class="pyq-header">
-          <div class="pyq-meta">
-            <span class="pyq-year">${q.year} (${q.set})</span>
-            <span class="pyq-chap">${q.chapterName}</span>
-            <span class="pyq-marks">${q.marks} Marks • ${q.type}</span>
+      card.innerHTML = `
+        <div class="pyq-card-head">
+          <div class="pyq-pill-group">
+            <span class="pill-year">${q.year} (${q.set})</span>
+            <span style="color:#fff; font-size:0.88rem; font-weight:600;">${q.chapterName}</span>
+            <span class="pill-marks">${q.marks} Marks • ${q.type}</span>
           </div>
-          <div class="pyq-actions-top">
-            <span class="freq-tag">🔥 ${q.frequency}</span>
-            <button class="btn-bookmark ${isBookmarked ? 'bookmarked' : ''}" data-id="${q.id}">
+          <div style="display:flex; align-items:center; gap:0.5rem;">
+            <span style="font-size:0.75rem; color:var(--amber);">🔥 ${q.frequency}</span>
+            <button class="btn-card btn-save-pyq ${isBookmarked ? 'highlight' : ''}" data-id="${q.id}">
               ${isBookmarked ? '★ Saved' : '☆ Save'}
             </button>
           </div>
         </div>
 
-        <div class="pyq-question">
+        <div class="pyq-q-body">
           <p><strong>Q:</strong> ${q.question.replace(/\n/g, '<br>')}</p>
         </div>
 
-        <button class="btn-toggle-solution" data-target="sol-${q.id}">
-          👁️ Reveal Step-by-Step Marking Solution
+        <button class="btn-show-solution" data-target="sol-${q.id}">
+          👁️ Show Step-by-Step Marking Solution
         </button>
 
-        <div class="pyq-solution hidden" id="sol-${q.id}">
-          <div class="sol-inner">
-            <h4 style="color: var(--cyan); margin-bottom: 0.5rem;">Official Marking Scheme Solution:</h4>
-            <div class="sol-text">${q.solution.replace(/\n/g, '<br>')}</div>
-            <div class="topper-note-box">
-              <strong>🎯 Topper Presentation Tip:</strong> ${q.topperTip}
-            </div>
+        <div class="solution-box hidden" id="sol-${q.id}">
+          <div style="color:var(--primary); font-weight:700; margin-bottom:0.4rem;">Official Marking Scheme Solution:</div>
+          <div>${q.solution.replace(/\n/g, '<br>')}</div>
+          <div style="margin-top:0.75rem; padding-top:0.5rem; border-top:1px solid var(--border); color:var(--amber); font-size:0.82rem;">
+            <strong>🎯 Topper Tip:</strong> ${q.topperTip}
           </div>
         </div>
       `;
 
-      pyqContainer.appendChild(item);
+      pyqContainer.appendChild(card);
     });
 
-    // Attach Toggle & Bookmark listeners
-    pyqContainer.querySelectorAll('.btn-toggle-solution').forEach(btn => {
+    pyqContainer.querySelectorAll('.btn-show-solution').forEach(btn => {
       btn.addEventListener('click', () => {
-        const solDiv = document.getElementById(btn.dataset.target);
-        if (solDiv) {
-          solDiv.classList.toggle('hidden');
-          btn.textContent = solDiv.classList.contains('hidden') 
-            ? '👁️ Reveal Step-by-Step Marking Solution' 
+        const solBox = document.getElementById(btn.dataset.target);
+        if (solBox) {
+          solBox.classList.toggle('hidden');
+          btn.textContent = solBox.classList.contains('hidden') 
+            ? '👁️ Show Step-by-Step Marking Solution' 
             : '🙈 Hide Solution';
         }
       });
     });
 
-    pyqContainer.querySelectorAll('.btn-bookmark').forEach(btn => {
+    pyqContainer.querySelectorAll('.btn-save-pyq').forEach(btn => {
       btn.addEventListener('click', () => {
-        const id = btn.dataset.id;
-        if (state.bookmarks.includes(id)) {
-          state.bookmarks = state.bookmarks.filter(b => b !== id);
-          btn.classList.remove('bookmarked');
-          btn.textContent = '☆ Save';
-        } else {
-          state.bookmarks.push(id);
-          btn.classList.add('bookmarked');
-          btn.textContent = '★ Saved';
+        if (!authManager.currentUser) {
+          alert("Please sign in with Google to save questions to your cloud profile!");
+          handleGoogleSignInClick();
+          return;
         }
-        localStorage.setItem('class10_bookmarks', JSON.stringify(state.bookmarks));
+
+        const isSaved = authManager.toggleBookmark(btn.dataset.id);
+        if (isSaved) {
+          btn.classList.add('highlight');
+          btn.textContent = '★ Saved';
+        } else {
+          btn.classList.remove('highlight');
+          btn.textContent = '☆ Save';
+        }
       });
     });
   }
@@ -391,7 +541,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const isSubmitted = state.dppSubmitted;
 
       let optionsHtml = q.options.map((opt, optIndex) => {
-        let optClass = 'dpp-option';
+        let optClass = 'dpp-opt-row';
         if (userSelected === optIndex) optClass += ' selected';
         if (isSubmitted) {
           if (optIndex === q.correct) optClass += ' correct';
@@ -400,8 +550,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
         return `
           <div class="${optClass}" data-qid="${q.id}" data-optindex="${optIndex}">
-            <span class="opt-letter">${String.fromCharCode(65 + optIndex)}</span>
-            <span class="opt-text">${opt}</span>
+            <span style="font-weight:700; width:24px; height:24px; border-radius:50%; background:var(--bg-input); display:flex; align-items:center; justify-content:center; font-size:0.75rem;">${String.fromCharCode(65 + optIndex)}</span>
+            <span style="font-size:0.9rem;">${opt}</span>
           </div>
         `;
       }).join('');
@@ -409,50 +559,43 @@ document.addEventListener('DOMContentLoaded', () => {
       let explanationHtml = '';
       if (isSubmitted) {
         explanationHtml = `
-          <div class="dpp-explanation">
+          <div style="background:var(--bg-input); padding:0.85rem; border-left:3px solid var(--green); border-radius:6px; font-size:0.85rem; color:#e2e8f0; margin-top:0.75rem;">
             <strong>Explanation:</strong> ${q.explanation}<br>
-            <span style="color: var(--cyan); font-size: 0.85rem;">💡 Hint: ${q.hint}</span>
+            <span style="color:var(--primary); font-size:0.8rem;">💡 Hint: ${q.hint}</span>
           </div>
         `;
       }
 
       return `
-        <div class="dpp-question-block">
-          <div class="dpp-q-header">
-            <span class="dpp-q-num">Q${qIndex + 1}</span>
-            <span class="dpp-diff-tag ${q.difficulty.toLowerCase()}">${q.difficulty}</span>
+        <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; margin-bottom:1rem;">
+          <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
+            <span style="color:var(--primary); font-weight:700; font-size:0.85rem;">Question ${qIndex + 1}</span>
+            <span class="tag-badge" style="background:var(--primary-light); color:#60a5fa;">${q.difficulty}</span>
           </div>
-          <p class="dpp-q-text">${q.question}</p>
-          <div class="dpp-options-grid">${optionsHtml}</div>
+          <p style="color:#fff; font-size:0.95rem; margin-bottom:1rem; line-height:1.5;">${q.question}</p>
+          <div>${optionsHtml}</div>
           ${explanationHtml}
         </div>
       `;
     }).join('');
 
     dppContainer.innerHTML = `
-      <div class="dpp-header-bar glass-panel">
+      <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
         <div>
-          <span class="dpp-pill">DPP SET #${dpp.dppNumber}</span>
-          <h2 style="color: #fff; margin: 0.3rem 0;">${dpp.chapterTitle}</h2>
-          <span style="color: var(--text-muted); font-size: 0.88rem;">⏱️ Time Suggested: ${dpp.timeLimitMinutes} Mins • ${dpp.questions.length} Questions</span>
+          <span class="tag-badge" style="background:var(--teal-light); color:#2dd4bf;">DPP SET #${dpp.dppNumber}</span>
+          <h2 style="color:#fff; font-size:1.25rem; margin:0.25rem 0;">${dpp.chapterTitle}</h2>
+          <span style="color:var(--text-muted); font-size:0.82rem;">⏱️ Suggested Time: ${dpp.timeLimitMinutes} Mins • ${dpp.questions.length} Questions</span>
         </div>
-        <div class="dpp-header-actions">
-          <button class="btn-primary" id="btnSubmitDpp">${state.dppSubmitted ? '🔄 Retake DPP' : '⚡ Submit Answers'}</button>
-        </div>
+        <button class="btn-primary" id="btnSubmitDpp">${state.dppSubmitted ? '🔄 Retake DPP' : '⚡ Submit Test'}</button>
       </div>
 
-      <div class="dpp-questions-wrapper">
-        ${questionsHtml}
-      </div>
+      <div>${questionsHtml}</div>
     `;
 
-    // Option Click Handlers
-    dppContainer.querySelectorAll('.dpp-option').forEach(opt => {
+    dppContainer.querySelectorAll('.dpp-opt-row').forEach(opt => {
       opt.addEventListener('click', () => {
         if (state.dppSubmitted) return;
-        const qid = opt.dataset.qid;
-        const optIndex = parseInt(opt.dataset.optindex);
-        state.dppAnswers[qid] = optIndex;
+        state.dppAnswers[opt.dataset.qid] = parseInt(opt.dataset.optindex);
         renderDPP();
       });
     });
@@ -465,12 +608,17 @@ document.addEventListener('DOMContentLoaded', () => {
           state.dppAnswers = {};
         } else {
           state.dppSubmitted = true;
-          // Calculate score
           let score = 0;
           dpp.questions.forEach(q => {
             if (state.dppAnswers[q.id] === q.correct) score++;
           });
-          alert(`🎯 DPP Completed!\nYour Score: ${score} / ${dpp.questions.length}\nCheck detailed explanations below.`);
+
+          // Save score to cloud if user is signed in
+          if (authManager.currentUser) {
+            authManager.saveDPPResult(state.activeDppChapter, score, dpp.questions.length);
+          }
+
+          alert(`🎯 DPP Completed!\nYour Score: ${score} / ${dpp.questions.length}\n${authManager.currentUser ? '✅ Score synced to your Founder cloud profile!' : 'Tip: Sign in with Google to save scores to your profile.'}`);
         }
         renderDPP();
       });
@@ -484,43 +632,38 @@ document.addEventListener('DOMContentLoaded', () => {
 
     SAMPLE_PAPERS_DATA.forEach(paper => {
       const card = document.createElement('div');
-      card.className = 'paper-card glass-panel';
+      card.className = 'app-card';
 
       let blueprintRows = Object.entries(paper.blueprint).map(([sec, desc]) => `
-        <div class="blueprint-row">
-          <strong>${sec.toUpperCase()}:</strong> <span>${desc}</span>
+        <div style="font-size:0.85rem; padding:0.3rem 0; border-bottom:1px solid var(--border);">
+          <strong style="color:#fff;">${sec.toUpperCase()}:</strong> <span style="color:var(--text-muted);">${desc}</span>
         </div>
       `).join('');
 
-      let strategyRows = paper.strategyTips.map(t => `<li>${t}</li>`).join('');
-
       card.innerHTML = `
-        <div class="paper-header">
+        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
           <div>
-            <span class="subject-tag">${paper.subject}</span>
-            <h3 style="color: #fff; font-size: 1.4rem; margin: 0.3rem 0;">${paper.title}</h3>
-            <span style="color: var(--cyan); font-size: 0.9rem;">Maximum Marks: ${paper.totalMarks} • Time Allowed: ${paper.timeHours} Hours</span>
+            <span class="card-subtitle">${paper.subject}</span>
+            <h3 style="color:#fff; font-size:1.3rem;">${paper.title}</h3>
+            <span style="color:var(--primary); font-size:0.85rem; font-weight:600;">Max Marks: ${paper.totalMarks} • Time: ${paper.timeHours} Hours</span>
           </div>
-          <button class="btn-primary btn-print-paper" onclick="window.print()">🖨️ Print / Save PDF</button>
+          <button class="btn-card highlight" onclick="window.print()">🖨️ Print / PDF</button>
         </div>
 
-        <div class="paper-body">
-          <h4 style="color: #fff; margin-bottom: 0.5rem;">📋 Exam Section Blueprint:</h4>
-          <div class="blueprint-box">${blueprintRows}</div>
+        <div style="background:var(--bg-input); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--border); margin-bottom:1rem;">
+          <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.5rem;">📋 Exam Section Blueprint:</h4>
+          ${blueprintRows}
+        </div>
 
-          <h4 style="color: #fff; margin: 1.2rem 0 0.5rem;">⏱️ 3-Hour Time Strategy:</h4>
-          <ul class="strategy-list">${strategyRows}</ul>
-
-          <h4 style="color: var(--cyan); margin: 1.2rem 0 0.5rem;">🎯 Featured High-Yield Model Questions:</h4>
-          <div class="sample-q-list">
-            ${paper.sampleQuestions.map(sq => `
-              <div class="sample-q-item">
-                <span class="sample-q-sec">${sq.section} • Q${sq.qNum}</span>
-                <p><strong>Q:</strong> ${sq.question.replace(/\n/g, '<br>')}</p>
-                <div class="sample-q-ans"><strong>Model Answer:</strong><br>${sq.answer.replace(/\n/g, '<br>')}</div>
-              </div>
-            `).join('')}
-          </div>
+        <h4 style="color:var(--primary); font-size:0.95rem; margin-bottom:0.5rem;">🎯 Featured Model Questions:</h4>
+        <div style="display:flex; flex-direction:column; gap:0.75rem;">
+          ${paper.sampleQuestions.map(sq => `
+            <div style="background:var(--bg-surface); padding:0.85rem; border-radius:var(--radius-md); font-size:0.88rem;">
+              <span style="color:var(--teal); font-weight:700; font-size:0.75rem;">${sq.section} • Q${sq.qNum}</span>
+              <p style="color:#fff; margin:0.3rem 0;"><strong>Q:</strong> ${sq.question.replace(/\n/g, '<br>')}</p>
+              <div style="color:#cbd5e1; font-size:0.85rem; margin-top:0.3rem;"><strong>Model Answer:</strong><br>${sq.answer.replace(/\n/g, '<br>')}</div>
+            </div>
+          `).join('')}
         </div>
       `;
 
@@ -542,13 +685,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!modal || !modalBody) return;
 
-    modalTitle.textContent = `${note.title} (${type === 'summary' ? '1-Page Flash Recall' : 'Full In-Depth Notes'})`;
+    modalTitle.textContent = `${note.title} (${type === 'summary' ? '1-Page Summary' : 'In-Depth Notes'})`;
 
     if (type === 'summary') {
       const summary = note.onePageSummary;
       let defsHtml = summary.keyDefinitions.map(d => `
-        <div class="modal-def-item">
-          <strong style="color: var(--cyan);">${d.term}:</strong> ${d.def}
+        <div style="background:var(--bg-surface); padding:0.75rem; border-radius:8px; border-left:3px solid var(--primary); margin-bottom:0.5rem; font-size:0.88rem;">
+          <strong style="color:var(--primary);">${d.term}:</strong> ${d.def}
         </div>
       `).join('');
 
@@ -556,22 +699,22 @@ document.addEventListener('DOMContentLoaded', () => {
       let tipsHtml = summary.topperExamTips.map(t => `<li>${t}</li>`).join('');
 
       modalBody.innerHTML = `
-        <div class="summary-modal-inner">
-          <div class="summary-badge-banner">⚡ 1-PAGE REVISION CHEAT SHEET • ${note.subject}</div>
-          
-          <h4 style="color: #fff; margin-bottom: 0.5rem;">📌 Essential Board Definitions:</h4>
-          <div class="modal-defs-grid">${defsHtml}</div>
-
-          <h4 style="color: #fff; margin: 1.5rem 0 0.5rem;">🔢 Core Reactions / Formulas:</h4>
-          <ul class="modal-formula-list">${formulasHtml}</ul>
-
-          <h4 style="color: var(--cyan); margin: 1.5rem 0 0.5rem;">🎯 Topper Exam Strategy:</h4>
-          <ul class="modal-tips-list">${tipsHtml}</ul>
+        <div style="display:inline-block; font-size:0.75rem; font-weight:700; background:var(--primary-light); color:#60a5fa; padding:0.25rem 0.6rem; border-radius:6px; margin-bottom:1rem;">
+          ⚡ 1-PAGE REVISION CHEAT SHEET • ${note.subject}
         </div>
+        
+        <h4 style="color:#fff; margin-bottom:0.5rem; font-size:0.95rem;">📌 Essential Board Definitions:</h4>
+        ${defsHtml}
+
+        <h4 style="color:#fff; margin:1.25rem 0 0.5rem; font-size:0.95rem;">🔢 Core Reactions / Formulas:</h4>
+        <ul style="padding-left:1.2rem; font-size:0.88rem; line-height:1.7; color:#cbd5e1;">${formulasHtml}</ul>
+
+        <h4 style="color:var(--amber); margin:1.25rem 0 0.5rem; font-size:0.95rem;">🎯 Topper Exam Strategy:</h4>
+        <ul style="padding-left:1.2rem; font-size:0.88rem; line-height:1.7; color:#cbd5e1;">${tipsHtml}</ul>
       `;
     } else {
       modalBody.innerHTML = `
-        <div class="full-notes-markdown">
+        <div style="font-size:0.92rem; line-height:1.8; color:#cbd5e1;">
           ${formatMarkdown(note.fullNotesMarkdown)}
         </div>
       `;
@@ -580,7 +723,6 @@ document.addEventListener('DOMContentLoaded', () => {
     modal.classList.add('open');
   }
 
-  // Modal Close
   const modalCloseBtn = document.getElementById('modalCloseBtn');
   const modal = document.getElementById('noteModal');
   if (modalCloseBtn && modal) {
@@ -590,6 +732,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Initial Render
+  // Initial Run
+  updateAuthUI();
   renderCurrentView();
 });

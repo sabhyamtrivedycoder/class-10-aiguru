@@ -1,0 +1,14 @@
+{
+  "appId": "com.sabhyamtrivedy.class10aiguru",
+  "appName": "Class 10 AI Guru",
+  "webDir": ".",
+  "bundledWebRuntime": false,
+  "server": {
+    "androidScheme": "https"
+  },
+  "android": {
+    "allowMixedContent": true,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": true
+  }
+}
