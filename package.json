@@ -1,0 +1,28 @@
+{
+  "name": "class-10-aiguru",
+  "version": "1.0.0",
+  "description": "All-in-One Class 10 NCERT & CBSE Board Exam Preparation Platform with 2004-2026 PYQ Vault, Visual Sketch Notes, DPPs, and Google Auth Gatekeeper",
+  "main": "src/app.js",
+  "scripts": {
+    "test": "node test.js",
+    "cap:add": "cap add android",
+    "cap:sync": "cap sync android",
+    "cap:open": "cap open android"
+  },
+  "keywords": [
+    "class-10",
+    "cbse",
+    "ncert",
+    "pyq",
+    "education",
+    "android",
+    "capacitor"
+  ],
+  "author": "Sabhyam Trivedy <sabhyamtrivedycoder>",
+  "license": "MIT",
+  "devDependencies": {
+    "@capacitor/cli": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/android": "^6.0.0"
+  }
+}
