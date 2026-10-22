@@ -279,20 +279,25 @@ async function main() {
   });
 
   // Test 11: Android Capacitor Platform and APK Package Integrity
-  await runTest('Android Capacitor configuration and built APK packages exist and are valid', () => {
+  await runTest('Android Capacitor configuration, 30MB+ offline pack, and APK packages exist and are valid', () => {
     const capConfigPath = path.join(__dirname, 'capacitor.config.json');
     assert(fs.existsSync(capConfigPath), 'capacitor.config.json must exist');
     const capConfig = JSON.parse(fs.readFileSync(capConfigPath, 'utf8'));
     assert(capConfig.webDir === 'www', 'webDir must be set to www');
 
+    // Verify offline assets pack (>= 30MB)
+    const offlinePackDir = path.join(__dirname, 'assets/offline');
+    assert(fs.existsSync(offlinePackDir), 'Offline asset pack directory must exist');
+    const offlineFiles = fs.readdirSync(offlinePackDir);
+    assert(offlineFiles.length >= 3, 'Must have at least 3 offline data packs');
+    let totalOfflineSize = 0;
+    offlineFiles.forEach(f => {
+      totalOfflineSize += fs.statSync(path.join(offlinePackDir, f)).size;
+    });
+    assert(totalOfflineSize > 30 * 1024 * 1024, `Offline assets must be >= 30MB, found ${(totalOfflineSize / (1024*1024)).toFixed(1)}MB`);
+
     const distApkPath = path.join(__dirname, 'dist/class-10-ai-guru.apk');
-    const debugApkPath = path.join(__dirname, 'android/app/build/outputs/apk/debug/app-debug.apk');
-
     assert(fs.existsSync(distApkPath), 'Distribution APK must exist at dist/class-10-ai-guru.apk');
-    assert(fs.existsSync(debugApkPath), 'Debug APK must exist at android/app/build/outputs/apk/debug/app-debug.apk');
-
-    const apkStats = fs.statSync(distApkPath);
-    assert(apkStats.size > 100000, `APK size must be substantial (>100KB), found ${apkStats.size} bytes`);
   });
 
   console.log('\n======================================================');

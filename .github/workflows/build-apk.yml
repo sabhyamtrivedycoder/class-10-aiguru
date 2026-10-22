@@ -45,23 +45,31 @@ jobs:
           chmod +x ./gradlew
           ./gradlew assembleDebug --stacktrace
 
-      - name: Verify APK Output
+      - name: Verify APK Output (Minimum 30 MB)
         run: |
           ls -lh android/app/build/outputs/apk/debug/app-debug.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk class-10-ai-guru.apk
           cp android/app/build/outputs/apk/debug/app-debug.apk class-10-ai-guru-v1.0.apk
-          echo "APK_SIZE=$(stat -c%s class-10-ai-guru-v1.0.apk)" >> $GITHUB_ENV
+          SIZE=$(stat -c%s class-10-ai-guru.apk)
+          echo "Built APK Size: $SIZE bytes ($((SIZE / 1024 / 1024)) MB)"
+          if [ $SIZE -lt 30000000 ]; then
+            echo "ERROR: APK size is less than 30MB ($SIZE bytes)"
+            exit 1
+          fi
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: class-10-ai-guru-v1.0-apk
-          path: class-10-ai-guru-v1.0.apk
+          name: class-10-ai-guru-apk
+          path: class-10-ai-guru.apk
 
       - name: Update GitHub Release v1.0.0
         uses: softprops/action-gh-release@v2
         if: always()
         with:
           tag_name: v1.0.0
-          files: class-10-ai-guru-v1.0.apk
+          files: |
+            class-10-ai-guru.apk
+            class-10-ai-guru-v1.0.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
