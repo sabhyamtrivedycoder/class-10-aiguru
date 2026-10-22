@@ -1,6 +1,6 @@
 /**
- * Class 10th AI - Official Pattern Sample Question Papers (SQP) & Blueprints
- * Structured for the 80-mark Class 10 Board Exam simulation.
+ * Class 10 AI Guru - Official Pattern Sample Question Papers (SQP) & Blueprints
+ * Structured for the 80-mark Class 10 Board Exam simulation across all subjects.
  */
 
 const SAMPLE_PAPERS_DATA = [
@@ -89,6 +89,103 @@ In right ΔAEC: tan(60°) = CE / AE ==> √3 = (H - 7) / 7 ==> H - 7 = 7√3
 H = 7√3 + 7 = 7(√3 + 1) m ≈ 7(1.732 + 1) = 7(2.732) = 19.124 m.
 Height of cable tower is 7(√3 + 1) m or 19.12 m.
         `
+      }
+    ]
+  },
+
+  {
+    id: "sqp-sst-2025",
+    subject: "Social Science (087)",
+    title: "CBSE Class 10 Social Science Board Blueprint Paper",
+    totalMarks: 80,
+    timeHours: 3,
+    blueprint: {
+      sectionA: "20 MCQs (Q1 - Q20) of 1 Mark each",
+      sectionB: "4 Very Short Answer Questions (Q21 - Q24) of 2 Marks each (limit: 40 words)",
+      sectionC: "5 Short Answer Questions (Q25 - Q29) of 3 Marks each (limit: 60 words)",
+      sectionD: "4 Long Answer Questions (Q30 - Q33) of 5 Marks each (limit: 120 words)",
+      sectionE: "3 Case-Based Questions (Q34 - Q36) of 4 Marks each with sub-questions",
+      sectionF: "1 Map Skill Based Question (Q37) of 5 Marks (History: 2 marks, Geography: 3 marks)"
+    },
+    strategyTips: [
+      "Use bullet points with underline headings in 5-markers instead of continuous running paragraphs.",
+      "Label map locations with capital letters and arrows."
+    ],
+    sampleQuestions: [
+      {
+        section: "Section A (1 Mark)",
+        qNum: 1,
+        question: "Which of the following treaties recognized Greece as an independent nation in 1832?",
+        answer: "Treaty of Constantinople of 1832."
+      },
+      {
+        section: "Section D (5 Marks)",
+        qNum: 30,
+        question: "Explain the role of credit in economic development. Distinguish between formal and informal sources of credit.",
+        answer: "Credit acts as capital for investment in farms, businesses, and education, raising national income. Formal sources (Banks, Cooperatives) are supervised by RBI, offer reasonable interest rates, and protect borrowers from debt traps. Informal sources (Moneylenders, Traders) charge exorbitant rates without oversight, leading to rural impoverishment."
+      }
+    ]
+  },
+
+  {
+    id: "sqp-eng-2025",
+    subject: "English Language & Literature (184)",
+    title: "CBSE Class 10 English Board Blueprint Paper",
+    totalMarks: 80,
+    timeHours: 3,
+    blueprint: {
+      sectionA: "Reading Skills (20 Marks) - 2 Unseen Passages (Discursive & Factual)",
+      sectionB: "Writing Skills and Grammar (20 Marks) - Formal Letter, Analytical Paragraph, Integrated Grammar",
+      sectionC: "Language Through Literature (40 Marks) - Reference to Context (10 Marks), Short & Long Questions (30 Marks)"
+    },
+    strategyTips: [
+      "Follow standard format strictly for Letter to Editor (sender address, date, receiver address, subject, salutation, body, sign-off).",
+      "Stick to the 100-120 word count limit for Analytical Paragraph."
+    ],
+    sampleQuestions: [
+      {
+        section: "Section B (5 Marks)",
+        qNum: 4,
+        question: "Write a letter to the Editor of a national daily highlighting the urgent need to preserve groundwater and harvest rainwater in residential colonies.",
+        answer: "Format followed: Sender's address, Date, The Editor (National Daily, New Delhi), Subject: Urgent Need for Rainwater Harvesting, Body (Introductory concern regarding depleted water table, practical harvesting solutions, appeal to civic authorities), Yours sincerely."
+      },
+      {
+        section: "Section C (6 Marks)",
+        qNum: 10,
+        question: "Compassion and empathy can transform any human being. Discuss with reference to Anil and Hari Singh in 'The Thief's Story'.",
+        answer: "Anil's calm trust and unconditional kindness touched Hari Singh's conscience. When Hari tried to flee with the stolen cash, the realization of losing an education and a genuine benefactor compelled him to return the wet notes, proving that compassion triumphs over criminality."
+      }
+    ]
+  },
+
+  {
+    id: "sqp-hin-2025",
+    subject: "Hindi Course 'A' (002)",
+    title: "CBSE Class 10 Hindi Board Model Paper",
+    totalMarks: 80,
+    timeHours: 3,
+    blueprint: {
+      sectionA: "अपठित बोध (10 अंक) - अपठित गद्यांश एवं काव्यांश",
+      sectionB: "व्यावहारिक व्याकरण (16 अंक) - वाक्य भेद, वाच्य, पद-परिचय, रस / मुहावरे",
+      sectionC: "पाठ्यपुस्तक एवं पूरक पाठ्यपुस्तक (क्षितिज एवं कृतिका - 34 अंक)",
+      sectionD: "रचनात्मक लेखन (20 अंक) - अनुच्छेद, पत्र-लेखन, स्ववृत्त/ई-मेल, विज्ञापन/संदेश"
+    },
+    strategyTips: [
+      "व्याकरण के बहुविकल्पीय प्रश्नों में नियम स्मरण करके सटीक उत्तर चुनें।",
+      "साहित्यिक प्रश्नों में पाठ का संदर्भ और लेखक का दृष्टिकोण अवश्य समाहित करें।"
+    ],
+    sampleQuestions: [
+      {
+        section: "खंड 'ख' (1 अंक)",
+        qNum: 3,
+        question: "'जो मेहनत करता है, वह अवश्य सफल होता है।' रचना की दृष्टि से वाक्य का भेद बताइए।",
+        answer: "मिश्र वाक्य (यहाँ 'जो मेहनत करता है' आश्रित उपवाक्य है और 'वह अवश्य सफल होता है' मुख्य उपवाक्य है)।"
+      },
+      {
+        section: "खंड 'ग' (6 अंक)",
+        qNum: 9,
+        question: "गोपियों ने उद्धव के योग संदेश को 'कड़वी ककड़ी' जैसा क्यों बताया? उनके अनुसार योग की आवश्यकता किसे है?",
+        answer: "गोपियों का हृदय श्रीकृष्ण के अनन्य प्रेम में लीन था। उद्धव का नीरस, ज्ञान-प्रधान और निराकार ईश्वर का संदेश उनके प्रेम-रस के समक्ष कड़वी ककड़ी के समान अरुचिकर और अग्राह्य लगा। सूरदास जी के अनुसार गोपियों ने कहा कि योग की सीख उन लोगों को दी जानी चाहिए जिनके मन चंचल हैं (चकरी के समान घूमते हैं), उनका मन तो केवल श्रीकृष्ण में स्थिर है।"
       }
     ]
   }

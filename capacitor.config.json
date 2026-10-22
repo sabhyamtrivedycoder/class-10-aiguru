@@ -1,8 +1,7 @@
 {
   "appId": "com.sabhyamtrivedy.class10aiguru",
   "appName": "Class 10 AI Guru",
-  "webDir": ".",
-  "bundledWebRuntime": false,
+  "webDir": "www",
   "server": {
     "androidScheme": "https"
   },

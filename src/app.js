@@ -1,6 +1,8 @@
 /**
  * Class 10 AI Guru - Application Controller
- * Android-Ready architecture with Google Authentication, 50-Student Quota, and Firebase Sync.
+ * Features Study Atmosphere Theme Switcher, Focus Pomodoro Timer,
+ * Authentic Topper Handwritten Manuscripts, Interactive Mind Maps,
+ * and 2004-2026 PYQ Solutions Hub.
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -14,8 +16,12 @@ document.addEventListener('DOMContentLoaded', () => {
     activeSubject: 'all',
     searchQuery: '',
     activeDppChapter: 'sci-01',
+    activeMindMapChapter: 'sci-01',
     dppAnswers: {},
-    dppSubmitted: false
+    dppSubmitted: false,
+    timerSeconds: 25 * 60,
+    timerRunning: false,
+    timerInterval: null
   };
 
   // DOM Elements
@@ -25,14 +31,23 @@ document.addEventListener('DOMContentLoaded', () => {
   const subjectButtons = document.querySelectorAll('.btn-subject');
   const globalSearchInput = document.getElementById('globalSearchInput');
   const notesContainer = document.getElementById('notesContainer');
+  const mindMapContainer = document.getElementById('mindMapContainer');
+  const mindMapChapterSelect = document.getElementById('mindMapChapterSelect');
   const sketchNotesContainer = document.getElementById('sketchNotesContainer');
   const pyqContainer = document.getElementById('pyqContainer');
   const dppContainer = document.getElementById('dppContainer');
   const papersContainer = document.getElementById('papersContainer');
   const pyqYearFilter = document.getElementById('pyqYearFilter');
+  const pyqRegionFilter = document.getElementById('pyqRegionFilter');
   const pyqMarksFilter = document.getElementById('pyqMarksFilter');
   const seatsLeftSpan = document.getElementById('seatsLeftSpan');
   
+  // Theme & Focus Timer Elements
+  const studyThemeSelect = document.getElementById('studyThemeSelect');
+  const focusTimerPill = document.getElementById('focusTimerPill');
+  const timerDisplay = document.getElementById('timerDisplay');
+  const timerIcon = document.getElementById('timerIcon');
+
   // Auth Elements
   const authArea = document.getElementById('authArea');
   const userModal = document.getElementById('userModal');
@@ -45,7 +60,60 @@ document.addEventListener('DOMContentLoaded', () => {
   const aiChatMessages = document.getElementById('aiChatMessages');
   const aiPromptChips = document.querySelectorAll('.prompt-chip');
 
-  // --- Auth UI & Quota Indicator ---
+  // --- 1. Study Atmosphere Theme Manager ---
+  function initTheme() {
+    const savedTheme = localStorage.getItem('class10_study_theme') || 'midnight-slate';
+    document.documentElement.setAttribute('data-theme', savedTheme);
+    if (studyThemeSelect) {
+      studyThemeSelect.value = savedTheme;
+      studyThemeSelect.addEventListener('change', (e) => {
+        const theme = e.target.value;
+        document.documentElement.setAttribute('data-theme', theme);
+        localStorage.setItem('class10_study_theme', theme);
+      });
+    }
+  }
+  initTheme();
+
+  // --- 2. Focus Study Pomodoro Timer (25 Min Sprint) ---
+  function initFocusTimer() {
+    if (!focusTimerPill || !timerDisplay) return;
+
+    function formatTime(totalSec) {
+      const mins = Math.floor(totalSec / 60);
+      const secs = totalSec % 60;
+      return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+
+    focusTimerPill.addEventListener('click', () => {
+      if (state.timerRunning) {
+        // Pause
+        clearInterval(state.timerInterval);
+        state.timerRunning = false;
+        if (timerIcon) timerIcon.textContent = '▶';
+      } else {
+        // Start
+        state.timerRunning = true;
+        if (timerIcon) timerIcon.textContent = '⏸';
+        state.timerInterval = setInterval(() => {
+          if (state.timerSeconds > 0) {
+            state.timerSeconds--;
+            timerDisplay.textContent = formatTime(state.timerSeconds);
+          } else {
+            clearInterval(state.timerInterval);
+            state.timerRunning = false;
+            if (timerIcon) timerIcon.textContent = '🔄';
+            alert('🔔 25-Minute Board Study Sprint Completed! Take a 5-minute break.');
+            state.timerSeconds = 25 * 60;
+            timerDisplay.textContent = '25:00';
+          }
+        }, 1000);
+      }
+    });
+  }
+  initFocusTimer();
+
+  // --- 3. Auth UI & Quota Indicator ---
   function updateAuthUI() {
     const enrolled = authManager.getEnrolledCount();
     const remainingSeats = Math.max(0, authManager.MAX_USERS - enrolled);
@@ -86,7 +154,6 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   async function handleGoogleSignInClick() {
-    // If Firebase SDK is configured with Google provider, use it; otherwise provide smooth prompt
     let studentName = prompt("Welcome to Class 10 AI Guru!\nEnter your name to join Founder Student Batch (Max 50):", "Sabhyam");
     if (!studentName || !studentName.trim()) return;
 
@@ -114,7 +181,6 @@ document.addEventListener('DOMContentLoaded', () => {
   function openUserProfileModal() {
     if (!userModal || !userModalBody || !authManager.currentUser) return;
     const u = authManager.currentUser;
-    const enrolled = authManager.getEnrolledCount();
     const bookmarks = authManager.getUserBookmarks();
     const uData = authManager.userData[u.uid] || {};
     const dppScores = uData.dppScores || {};
@@ -181,7 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
     userModalClose.addEventListener('click', () => userModal.classList.remove('open'));
   }
 
-  // --- Synchronized Tab Navigation (Desktop Tabs & Android Bottom Nav) ---
+  // --- 4. Synchronized Tab Navigation ---
   function switchTab(targetId) {
     desktopTabs.forEach(t => {
       if (t.dataset.target === targetId) t.classList.add('active');
@@ -210,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
     item.addEventListener('click', () => switchTab(item.dataset.target));
   });
 
-  // --- Subject Filtering ---
+  // --- 5. Subject Filtering ---
   subjectButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       subjectButtons.forEach(b => b.classList.remove('active'));
@@ -220,7 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // --- Search Input ---
+  // --- 6. Search Input ---
   if (globalSearchInput) {
     globalSearchInput.addEventListener('input', (e) => {
       state.searchQuery = e.target.value.toLowerCase().trim();
@@ -228,15 +294,18 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- PYQ Filter Selects ---
+  // --- 7. PYQ Filter Selects ---
   if (pyqYearFilter) {
     pyqYearFilter.addEventListener('change', () => renderPYQs());
+  }
+  if (pyqRegionFilter) {
+    pyqRegionFilter.addEventListener('change', () => renderPYQs());
   }
   if (pyqMarksFilter) {
     pyqMarksFilter.addEventListener('change', () => renderPYQs());
   }
 
-  // --- AI Chat Logic ---
+  // --- 8. AI Chat Logic ---
   function sendAIMessage(text) {
     const q = text || (aiInput ? aiInput.value : '');
     if (!q.trim()) return;
@@ -295,18 +364,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // --- View Renderers ---
   function renderCurrentView() {
     renderNotes();
+    renderMindMaps();
     renderSketchNotes();
     renderPYQs();
     renderDPP();
     renderSamplePapers();
   }
 
-  // 1. Render Notes
+  // 1. Render Authentic Topper Handwritten Notes
   function renderNotes() {
     if (!notesContainer) return;
     notesContainer.innerHTML = '';
 
-    let subjects = ['science', 'maths', 'social_science'];
+    let subjects = ['science', 'maths', 'social_science', 'english', 'hindi'];
     if (state.activeSubject !== 'all') subjects = [state.activeSubject];
 
     let allChapters = [];
@@ -322,48 +392,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (allChapters.length === 0) {
-      notesContainer.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:3rem; color:var(--text-muted);">No chapters found matching "${state.searchQuery}". Try 'heart', 'light', or 'trig'.</div>`;
+      notesContainer.innerHTML = `<div style="grid-column: 1/-1; text-align:center; padding:3rem; color:var(--text-muted);">No chapters found matching "${state.searchQuery}". Try searching 'chemical', 'triangles', or 'letter'.</div>`;
       return;
     }
 
     allChapters.forEach(chap => {
       const noteData = NOTES_DATA[chap.id];
       const card = document.createElement('div');
-      card.className = 'app-card';
+      card.className = 'study-card';
 
-      let badgesHtml = chap.tags.map(t => `<span class="chip">${t}</span>`).join('');
-      let hasFullNotes = !!noteData;
+      let badgesHtml = chap.tags.map(t => `<span class="tag-item">${t}</span>`).join('');
+      let hasTopperNotes = !!noteData;
 
       card.innerHTML = `
         <div>
           <div class="card-top">
-            <div class="card-title-group">
-              <span class="card-icon">${chap.icon}</span>
-              <div>
-                <span class="card-subtitle">Chapter ${chap.number} • ${chap.unit}</span>
-                <h3 class="card-heading">${chap.name}</h3>
-              </div>
-            </div>
-            <span class="tag-badge">${chap.weightage}</span>
+            <span class="chapter-number-pill">Ch ${chap.number} • ${chap.unit}</span>
+            <span class="tag-item" style="color:#fbbf24; font-weight:700;">${chap.weightage}</span>
           </div>
-          <div class="chip-row">${badgesHtml}</div>
+          <h3 class="card-title">${chap.icon} ${chap.name}</h3>
+          <p class="card-sub">${hasTopperNotes ? (noteData.topperBadge || 'CBSE 100/100 Topper Curated') : 'NCERT Master Syllabus'}</p>
+          <div class="tag-list">${badgesHtml}</div>
         </div>
 
-        <div class="card-buttons">
-          <button class="btn-card highlight btn-summary" data-id="${chap.id}">⚡ 1-Page Notes</button>
-          ${hasFullNotes ? `<button class="btn-card btn-full" data-id="${chap.id}">📖 In-Depth</button>` : `<span style="font-size:0.75rem; color:var(--text-sub); align-self:center;">NCERT Standard</span>`}
-          <button class="btn-card btn-dpp-link" data-id="${chap.id}">📝 DPP</button>
+        <div class="card-actions">
+          <button class="btn-card primary btn-topper-sheet" data-id="${chap.id}">
+            📝 Topper Sheet
+          </button>
+          <button class="btn-card btn-mindmap-link" data-id="${chap.id}">
+            🧠 Mind Map
+          </button>
+          <button class="btn-card btn-dpp-link" data-id="${chap.id}">
+            📝 DPP
+          </button>
         </div>
       `;
 
       notesContainer.appendChild(card);
     });
 
-    notesContainer.querySelectorAll('.btn-summary').forEach(btn => {
-      btn.addEventListener('click', () => openNoteModal(btn.dataset.id, 'summary'));
+    notesContainer.querySelectorAll('.btn-topper-sheet').forEach(btn => {
+      btn.addEventListener('click', () => openTopperModal(btn.dataset.id));
     });
-    notesContainer.querySelectorAll('.btn-full').forEach(btn => {
-      btn.addEventListener('click', () => openNoteModal(btn.dataset.id, 'full'));
+    notesContainer.querySelectorAll('.btn-mindmap-link').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.activeMindMapChapter = btn.dataset.id;
+        switchTab('mindMapSection');
+      });
     });
     notesContainer.querySelectorAll('.btn-dpp-link').forEach(btn => {
       btn.addEventListener('click', () => {
@@ -373,14 +448,89 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 2. Render Sketch Notes
+  // 2. Render Interactive Visual Mind Maps
+  function renderMindMaps() {
+    if (!mindMapContainer) return;
+    
+    // Populate chapter select dropdown if empty or on subject change
+    if (mindMapChapterSelect && mindMapChapterSelect.options.length <= 1) {
+      mindMapChapterSelect.innerHTML = '';
+      MIND_MAPS_DATA.forEach(mm => {
+        const opt = document.createElement('option');
+        opt.value = mm.chapterId;
+        opt.textContent = `${mm.icon} ${mm.subjectName}: ${mm.chapterName}`;
+        if (mm.chapterId === state.activeMindMapChapter) opt.selected = true;
+        mindMapChapterSelect.appendChild(opt);
+      });
+
+      mindMapChapterSelect.addEventListener('change', (e) => {
+        state.activeMindMapChapter = e.target.value;
+        renderMindMaps();
+      });
+    }
+
+    // Find active mind map
+    let mm = MIND_MAPS_DATA.find(m => m.chapterId === state.activeMindMapChapter) || MIND_MAPS_DATA[0];
+    if (!mm) return;
+
+    let branchesHtml = mm.branches.map(b => {
+      let itemsHtml = b.items.map(item => `
+        <div class="mindmap-leaf-item" style="border-left-color: ${b.color};">
+          <div class="leaf-name">${item.name}</div>
+          <div class="leaf-desc">${item.desc}</div>
+          <div class="leaf-tip-badge">💡 ${item.tip}</div>
+        </div>
+      `).join('');
+
+      return `
+        <div class="mindmap-branch-box" style="border-top: 3px solid ${b.color};">
+          <div class="mindmap-branch-head" style="color: ${b.color};">
+            <span>${b.icon}</span>
+            <span>${b.title}</span>
+          </div>
+          <div class="mindmap-items-list">
+            ${itemsHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    mindMapContainer.innerHTML = `
+      <div class="mindmap-shell">
+        <div class="mindmap-toolbar">
+          <div>
+            <span class="topper-badge-stamp">Interactive Mind Map Engine</span>
+            <span style="font-size:0.8rem; color:var(--text-muted); margin-left:0.5rem;">${mm.subjectName}</span>
+          </div>
+          <button class="btn-card" onclick="window.print()" style="max-width:140px;">🖨️ Export PDF</button>
+        </div>
+
+        <div class="mindmap-core-node">
+          <div class="mindmap-core-title">${mm.icon} ${mm.rootNode.title}</div>
+          <div class="mindmap-core-sub">${mm.rootNode.coreIdea}</div>
+        </div>
+
+        <div class="mindmap-branches-grid">
+          ${branchesHtml}
+        </div>
+      </div>
+    `;
+  }
+
+  // 3. Render Visual Sketch Notes
   function renderSketchNotes() {
     if (!sketchNotesContainer) return;
     sketchNotesContainer.innerHTML = '';
 
     let items = SKETCH_NOTES_DATA;
     if (state.activeSubject !== 'all') {
-      const map = { science: 'Science', maths: 'Mathematics', social_science: 'Social Science' };
+      const map = { 
+        science: 'Science', 
+        maths: 'Mathematics', 
+        social_science: 'Social Science',
+        english: 'English',
+        hindi: 'Hindi'
+      };
       const subName = map[state.activeSubject];
       if (subName) items = items.filter(s => s.subject.includes(subName));
     }
@@ -394,27 +544,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
     items.forEach(sketch => {
       const card = document.createElement('div');
-      card.className = 'app-card';
+      card.className = 'study-card';
 
       card.innerHTML = `
         <div style="margin-bottom:0.75rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.25rem;">
             <span style="font-size:0.72rem; color:var(--primary); font-weight:600; text-transform:uppercase;">${sketch.subject}</span>
-            <span class="tag-badge" style="background:rgba(225,29,72,0.15); color:#fb7185;">${sketch.badge}</span>
+            <span class="topper-badge-stamp" style="font-size:0.65rem;">${sketch.badge}</span>
           </div>
-          <h3 style="color:#fff; font-size:1.15rem; font-weight:700;">${sketch.title}</h3>
-          <p style="color:var(--text-muted); font-size:0.85rem; margin-top:0.2rem;">${sketch.description}</p>
+          <h3 style="color:#fff; font-size:1.1rem; font-weight:700;">${sketch.title}</h3>
+          <p style="color:var(--text-muted); font-size:0.82rem; margin-top:0.2rem;">${sketch.description}</p>
         </div>
 
         <div style="width:100%; border-radius:12px; overflow:hidden; border:1px solid var(--border); margin-bottom:0.75rem;">
           ${sketch.svgContent}
         </div>
 
-        <div style="background:var(--bg-input); padding:0.75rem; border-radius:8px; border-left:3px solid var(--primary); font-size:0.82rem; color:var(--text-muted);">
-          <strong style="color:#fff;">💡 Topper Exam Tip:</strong>
-          <ul style="padding-left:1.1rem; margin-top:0.2rem;">
-            ${sketch.examNotes.map(n => `<li>${n}</li>`).join('')}
-          </ul>
+        <div class="topper-secret-box">
+          <span>💡</span>
+          <div>
+            ${sketch.examNotes.map(n => `<div>• ${n}</div>`).join('')}
+          </div>
         </div>
       `;
 
@@ -422,12 +572,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // 3. Render 2004 - 2026 PYQs
+  // 4. Render 2004 - 2026 PYQ Vault & Dedicated Solutions Hub
   function renderPYQs() {
     if (!pyqContainer) return;
     pyqContainer.innerHTML = '';
 
     const selectedYear = pyqYearFilter ? pyqYearFilter.value : 'all';
+    const selectedRegion = pyqRegionFilter ? pyqRegionFilter.value : 'all';
     const selectedMarks = pyqMarksFilter ? pyqMarksFilter.value : 'all';
 
     let list = PYQ_VAULT_DATA;
@@ -435,23 +586,33 @@ document.addEventListener('DOMContentLoaded', () => {
     if (selectedYear !== 'all') {
       list = list.filter(q => q.year.toString() === selectedYear);
     }
+    if (selectedRegion !== 'all') {
+      list = list.filter(q => q.region === selectedRegion || q.set.includes(selectedRegion));
+    }
     if (selectedMarks !== 'all') {
       list = list.filter(q => q.marks.toString() === selectedMarks);
     }
     if (state.activeSubject !== 'all') {
-      const map = { science: 'Science', maths: 'Mathematics', social_science: 'Social Science' };
+      const map = { 
+        science: 'Science', 
+        maths: 'Mathematics', 
+        social_science: 'Social Science',
+        english: 'English',
+        hindi: 'Hindi'
+      };
       const subName = map[state.activeSubject];
       if (subName) list = list.filter(q => q.subject.includes(subName));
     }
     if (state.searchQuery) {
       list = list.filter(q => 
         q.question.toLowerCase().includes(state.searchQuery) ||
-        q.chapterName.toLowerCase().includes(state.searchQuery)
+        q.chapterName.toLowerCase().includes(state.searchQuery) ||
+        q.solution.toLowerCase().includes(state.searchQuery)
       );
     }
 
     if (list.length === 0) {
-      pyqContainer.innerHTML = `<div style="text-align:center; padding:3rem; color:var(--text-muted);">No PYQ found for this criteria. Try changing year or marks filter!</div>`;
+      pyqContainer.innerHTML = `<div style="text-align:center; padding:3rem; color:var(--text-muted);">No board question found matching your filter criteria. Try resetting year or marks filter!</div>`;
       return;
     }
 
@@ -466,13 +627,14 @@ document.addEventListener('DOMContentLoaded', () => {
       card.innerHTML = `
         <div class="pyq-card-head">
           <div class="pyq-pill-group">
-            <span class="pill-year">${q.year} (${q.set})</span>
-            <span style="color:#fff; font-size:0.88rem; font-weight:600;">${q.chapterName}</span>
+            <span class="pill-year">${q.year}</span>
+            <span class="pill-region">${q.set}</span>
             <span class="pill-marks">${q.marks} Marks • ${q.type}</span>
+            <span style="color:var(--text-main); font-size:0.85rem; font-weight:600;">${q.subject} • ${q.chapterName}</span>
           </div>
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <span style="font-size:0.75rem; color:var(--amber);">🔥 ${q.frequency}</span>
-            <button class="btn-card btn-save-pyq ${isBookmarked ? 'highlight' : ''}" data-id="${q.id}">
+            <button class="btn-card btn-save-pyq" data-id="${q.id}" style="padding:0.25rem 0.6rem; font-size:0.75rem;">
               ${isBookmarked ? '★ Saved' : '☆ Save'}
             </button>
           </div>
@@ -483,14 +645,20 @@ document.addEventListener('DOMContentLoaded', () => {
         </div>
 
         <button class="btn-show-solution" data-target="sol-${q.id}">
-          👁️ Show Step-by-Step Marking Solution
+          👁️ Show Step-by-Step Marking Scheme Solution
         </button>
 
         <div class="solution-box hidden" id="sol-${q.id}">
-          <div style="color:var(--primary); font-weight:700; margin-bottom:0.4rem;">Official Marking Scheme Solution:</div>
-          <div>${q.solution.replace(/\n/g, '<br>')}</div>
-          <div style="margin-top:0.75rem; padding-top:0.5rem; border-top:1px solid var(--border); color:var(--amber); font-size:0.82rem;">
-            <strong>🎯 Topper Tip:</strong> ${q.topperTip}
+          <div style="color:var(--primary); font-weight:700; margin-bottom:0.4rem; display:flex; justify-content:space-between;">
+            <span>Official CBSE Step-by-Step Marking Scheme:</span>
+            <span class="solution-mark-badge">+${q.marks} Marks Full Credit</span>
+          </div>
+          <div class="solution-step-callout">
+            ${q.solution.replace(/\n/g, '<br>')}
+          </div>
+          <div class="topper-secret-box">
+            <span>🎯</span>
+            <div><strong>CBSE 100/100 Topper Strategy:</strong> ${q.topperTip}</div>
           </div>
         </div>
       `;
@@ -504,7 +672,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (solBox) {
           solBox.classList.toggle('hidden');
           btn.textContent = solBox.classList.contains('hidden') 
-            ? '👁️ Show Step-by-Step Marking Solution' 
+            ? '👁️ Show Step-by-Step Marking Scheme Solution' 
             : '🙈 Hide Solution';
         }
       });
@@ -513,24 +681,18 @@ document.addEventListener('DOMContentLoaded', () => {
     pyqContainer.querySelectorAll('.btn-save-pyq').forEach(btn => {
       btn.addEventListener('click', () => {
         if (!authManager.currentUser) {
-          alert("Please sign in with Google to save questions to your cloud profile!");
+          alert("Please sign in with Google to save questions to your founder cloud profile!");
           handleGoogleSignInClick();
           return;
         }
 
         const isSaved = authManager.toggleBookmark(btn.dataset.id);
-        if (isSaved) {
-          btn.classList.add('highlight');
-          btn.textContent = '★ Saved';
-        } else {
-          btn.classList.remove('highlight');
-          btn.textContent = '☆ Save';
-        }
+        btn.textContent = isSaved ? '★ Saved' : '☆ Save';
       });
     });
   }
 
-  // 4. Render DPP
+  // 5. Render DPP (Daily Practice Problems)
   function renderDPP() {
     if (!dppContainer) return;
     const dpp = DPP_SETS[state.activeDppChapter] || DPP_SETS['sci-01'];
@@ -570,7 +732,7 @@ document.addEventListener('DOMContentLoaded', () => {
         <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; margin-bottom:1rem;">
           <div style="display:flex; justify-content:space-between; margin-bottom:0.5rem;">
             <span style="color:var(--primary); font-weight:700; font-size:0.85rem;">Question ${qIndex + 1}</span>
-            <span class="tag-badge" style="background:var(--primary-light); color:#60a5fa;">${q.difficulty}</span>
+            <span class="topper-badge-stamp">${q.difficulty}</span>
           </div>
           <p style="color:#fff; font-size:0.95rem; margin-bottom:1rem; line-height:1.5;">${q.question}</p>
           <div>${optionsHtml}</div>
@@ -582,7 +744,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dppContainer.innerHTML = `
       <div style="background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.25rem; margin-bottom:1.25rem; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:1rem;">
         <div>
-          <span class="tag-badge" style="background:var(--teal-light); color:#2dd4bf;">DPP SET #${dpp.dppNumber}</span>
+          <span class="topper-badge-stamp">DPP SET #${dpp.dppNumber}</span>
           <h2 style="color:#fff; font-size:1.25rem; margin:0.25rem 0;">${dpp.chapterTitle}</h2>
           <span style="color:var(--text-muted); font-size:0.82rem;">⏱️ Suggested Time: ${dpp.timeLimitMinutes} Mins • ${dpp.questions.length} Questions</span>
         </div>
@@ -613,7 +775,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (state.dppAnswers[q.id] === q.correct) score++;
           });
 
-          // Save score to cloud if user is signed in
           if (authManager.currentUser) {
             authManager.saveDPPResult(state.activeDppChapter, score, dpp.questions.length);
           }
@@ -625,17 +786,17 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  // 5. Render Sample Papers
+  // 6. Render Sample Papers
   function renderSamplePapers() {
     if (!papersContainer) return;
     papersContainer.innerHTML = '';
 
     SAMPLE_PAPERS_DATA.forEach(paper => {
       const card = document.createElement('div');
-      card.className = 'app-card';
+      card.className = 'study-card';
 
       let blueprintRows = Object.entries(paper.blueprint).map(([sec, desc]) => `
-        <div style="font-size:0.85rem; padding:0.3rem 0; border-bottom:1px solid var(--border);">
+        <div style="font-size:0.85rem; padding:0.35rem 0; border-bottom:1px solid var(--border);">
           <strong style="color:#fff;">${sec.toUpperCase()}:</strong> <span style="color:var(--text-muted);">${desc}</span>
         </div>
       `).join('');
@@ -643,11 +804,11 @@ document.addEventListener('DOMContentLoaded', () => {
       card.innerHTML = `
         <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; margin-bottom:1rem;">
           <div>
-            <span class="card-subtitle">${paper.subject}</span>
-            <h3 style="color:#fff; font-size:1.3rem;">${paper.title}</h3>
+            <span class="topper-badge-stamp">${paper.subject}</span>
+            <h3 style="color:#fff; font-size:1.25rem; margin-top:0.3rem;">${paper.title}</h3>
             <span style="color:var(--primary); font-size:0.85rem; font-weight:600;">Max Marks: ${paper.totalMarks} • Time: ${paper.timeHours} Hours</span>
           </div>
-          <button class="btn-card highlight" onclick="window.print()">🖨️ Print / PDF</button>
+          <button class="btn-card" onclick="window.print()" style="max-width:140px;">🖨️ Print / PDF</button>
         </div>
 
         <div style="background:var(--bg-input); padding:1rem; border-radius:var(--radius-md); border:1px solid var(--border); margin-bottom:1rem;">
@@ -671,11 +832,11 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // --- Modal Note Viewer ---
-  function openNoteModal(chapterId, type) {
+  // --- Modal: Authentic Topper Handwritten Ruled Manuscript Viewer ---
+  function openTopperModal(chapterId) {
     const note = NOTES_DATA[chapterId];
     if (!note) {
-      alert("Notes for this chapter are currently being indexed from the latest NCERT revision.");
+      alert("Topper notes for this chapter are currently in transcription from official CBSE topper answer scripts.");
       return;
     }
 
@@ -685,40 +846,85 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (!modal || !modalBody) return;
 
-    modalTitle.textContent = `${note.title} (${type === 'summary' ? '1-Page Summary' : 'In-Depth Notes'})`;
+    modalTitle.textContent = `${note.title}`;
 
-    if (type === 'summary') {
-      const summary = note.onePageSummary;
-      let defsHtml = summary.keyDefinitions.map(d => `
-        <div style="background:var(--bg-surface); padding:0.75rem; border-radius:8px; border-left:3px solid var(--primary); margin-bottom:0.5rem; font-size:0.88rem;">
-          <strong style="color:var(--primary);">${d.term}:</strong> ${d.def}
+    const summary = note.onePageSummary;
+    let defsHtml = summary.keyDefinitions.map(d => `
+      <div style="margin-bottom:0.6rem;">
+        <span class="topper-highlighter">${d.term}</span>: <span class="topper-hand-note">${d.def}</span>
+      </div>
+    `).join('');
+
+    let formulasHtml = summary.mustKnowFormulas.map(f => `
+      <div style="padding:0.2rem 0; font-family:var(--font-mono); font-size:0.88rem; color:#93c5fd;">
+        ⚡ ${f}
+      </div>
+    `).join('');
+
+    let marginalHtml = (summary.topperMarginalNotes || []).map(m => `
+      <div class="topper-margin-card">
+        <span class="topper-margin-tag">${m.tag}</span>
+        <span>${m.note}</span>
+      </div>
+    `).join('');
+
+    let mistakesHtml = (summary.commonBoardMistakes || []).map(m => `
+      <li style="color:#fda4af; margin-bottom:0.25rem;">${m}</li>
+    `).join('');
+
+    modalBody.innerHTML = `
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem; flex-wrap:wrap; gap:0.5rem;">
+        <span class="topper-badge-stamp">🏅 ${note.topperBadge || 'CBSE 100/100 Topper Manuscript'}</span>
+        <span class="scribd-ref-pill">Scribd Archive: ${note.scribdDocId || 'CBSE-TOP-2024'}</span>
+      </div>
+
+      <div class="topper-notebook-sheet">
+        <div class="topper-notebook-header">
+          <div>
+            <div class="topper-script-title">${note.title}</div>
+            <span style="font-size:0.75rem; color:var(--text-sub);">${note.subject} • ${note.readTime}</span>
+          </div>
+          <span style="font-size:1.3rem;">🖋️</span>
         </div>
-      `).join('');
 
-      let formulasHtml = summary.mustKnowFormulas.map(f => `<li><code>${f}</code></li>`).join('');
-      let tipsHtml = summary.topperExamTips.map(t => `<li>${t}</li>`).join('');
-
-      modalBody.innerHTML = `
-        <div style="display:inline-block; font-size:0.75rem; font-weight:700; background:var(--primary-light); color:#60a5fa; padding:0.25rem 0.6rem; border-radius:6px; margin-bottom:1rem;">
-          ⚡ 1-PAGE REVISION CHEAT SHEET • ${note.subject}
+        <div style="margin-bottom:1.25rem;">
+          <h4 style="font-family:var(--font-sans); color:var(--primary); font-size:0.85rem; text-transform:uppercase; margin-bottom:0.4rem;">
+            📌 Core Definitions & Concepts:
+          </h4>
+          ${defsHtml}
         </div>
-        
-        <h4 style="color:#fff; margin-bottom:0.5rem; font-size:0.95rem;">📌 Essential Board Definitions:</h4>
-        ${defsHtml}
 
-        <h4 style="color:#fff; margin:1.25rem 0 0.5rem; font-size:0.95rem;">🔢 Core Reactions / Formulas:</h4>
-        <ul style="padding-left:1.2rem; font-size:0.88rem; line-height:1.7; color:#cbd5e1;">${formulasHtml}</ul>
+        <div style="margin-bottom:1.25rem;">
+          <h4 style="font-family:var(--font-sans); color:var(--primary); font-size:0.85rem; text-transform:uppercase; margin-bottom:0.4rem;">
+            🔢 High-Yield Equations & Formulas:
+          </h4>
+          ${formulasHtml}
+        </div>
 
-        <h4 style="color:var(--amber); margin:1.25rem 0 0.5rem; font-size:0.95rem;">🎯 Topper Exam Strategy:</h4>
-        <ul style="padding-left:1.2rem; font-size:0.88rem; line-height:1.7; color:#cbd5e1;">${tipsHtml}</ul>
-      `;
-    } else {
-      modalBody.innerHTML = `
-        <div style="font-size:0.92rem; line-height:1.8; color:#cbd5e1;">
+        <div style="margin-bottom:1rem;">
+          <h4 style="font-family:var(--font-sans); color:#fbbf24; font-size:0.85rem; text-transform:uppercase; margin-bottom:0.4rem;">
+            💡 Topper Margin Secrets:
+          </h4>
+          ${marginalHtml}
+        </div>
+
+        <div style="background:rgba(225,29,72,0.1); border-left:3px solid var(--rose); padding:0.75rem; border-radius:6px; margin-top:1rem;">
+          <h4 style="color:#fb7185; font-size:0.82rem; text-transform:uppercase; margin-bottom:0.3rem;">
+            ⚠️ Common Mistakes in Board Answer Copies (Avoid These!):
+          </h4>
+          <ul style="padding-left:1.2rem; font-size:0.82rem; line-height:1.6;">
+            ${mistakesHtml}
+          </ul>
+        </div>
+      </div>
+
+      <div style="margin-top:1.25rem; padding-top:1rem; border-top:1px solid var(--border);">
+        <h4 style="color:#fff; font-size:0.95rem; margin-bottom:0.5rem;">📖 Full Markdown Manuscript Notes:</h4>
+        <div style="font-size:0.88rem; line-height:1.7; color:#cbd5e1;">
           ${formatMarkdown(note.fullNotesMarkdown)}
         </div>
-      `;
-    }
+      </div>
+    `;
 
     modal.classList.add('open');
   }

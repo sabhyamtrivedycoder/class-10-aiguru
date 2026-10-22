@@ -326,6 +326,210 @@ const SYLLABUS_DATA = {
       tags: ["Formal vs Informal Credit", "Reserve Bank Role", "SHGs", "Collateral"],
       icon: "💳"
     }
+  ],
+
+  english: [
+    {
+      id: "eng-01",
+      number: 1,
+      name: "A Letter to God (G.L. Fuentes)",
+      unit: "First Flight (Prose)",
+      weightage: "4-5 Marks",
+      tags: ["Lencho", "Faith", "Irony", "Postmaster"],
+      icon: "✉️"
+    },
+    {
+      id: "eng-02",
+      number: 2,
+      name: "Nelson Mandela: Long Walk to Freedom",
+      unit: "First Flight (Prose)",
+      weightage: "5-6 Marks",
+      tags: ["Apartheid", "Freedom", "Courage", "Inauguration"],
+      icon: "🇿🇦"
+    },
+    {
+      id: "eng-03",
+      number: 3,
+      name: "From the Diary of Anne Frank",
+      unit: "First Flight (Prose)",
+      weightage: "4-5 Marks",
+      tags: ["Kitty", "Secret Annex", "Introspection", "Mr Keesing"],
+      icon: "📔"
+    },
+    {
+      id: "eng-04",
+      number: 4,
+      name: "Glimpses of India (Baker, Coorg, Tea from Assam)",
+      unit: "First Flight (Prose)",
+      weightage: "5-6 Marks",
+      tags: ["Pader", "Kodagu", "Assam Tea Plantations"],
+      icon: "☕"
+    },
+    {
+      id: "eng-05",
+      number: 5,
+      name: "Madam Rides the Bus",
+      unit: "First Flight (Prose)",
+      weightage: "4-5 Marks",
+      tags: ["Valli", "Self-respect", "Journey of Life and Death"],
+      icon: "🚌"
+    },
+    {
+      id: "eng-06",
+      number: 6,
+      name: "The Sermon at Benares",
+      unit: "First Flight (Prose)",
+      weightage: "4-5 Marks",
+      tags: ["Gautama Buddha", "Kisa Gotami", "Mustard Seed", "Mortality"],
+      icon: "🧘"
+    },
+    {
+      id: "eng-07",
+      number: 7,
+      name: "Poetry: Dust of Snow, Fire and Ice, Tiger in the Zoo",
+      unit: "First Flight (Poetry)",
+      weightage: "6-7 Marks",
+      tags: ["Robert Frost", "Metaphor", "Symbolism", "Rhyme Scheme"],
+      icon: "❄️"
+    },
+    {
+      id: "eng-08",
+      number: 8,
+      name: "A Triumph of Surgery",
+      unit: "Footprints without Feet",
+      weightage: "4 Marks",
+      tags: ["Tricki", "Mrs Pumphrey", "Dr Herriot", "Overfeeding"],
+      icon: "🐕"
+    },
+    {
+      id: "eng-09",
+      number: 9,
+      name: "The Thief's Story",
+      unit: "Footprints without Feet",
+      weightage: "4-5 Marks",
+      tags: ["Hari Singh", "Anil", "Trust", "Transformation"],
+      icon: "🗝️"
+    },
+    {
+      id: "eng-10",
+      number: 10,
+      name: "The Necklace",
+      unit: "Footprints without Feet",
+      weightage: "5 Marks",
+      tags: ["Matilda Loisel", "M. Loisel", "Madame Forestier", "Vanity"],
+      icon: "📿"
+    },
+    {
+      id: "eng-11",
+      number: 11,
+      name: "Bholi",
+      unit: "Footprints without Feet",
+      weightage: "5-6 Marks",
+      tags: ["Sulekha", "Education", "Self-Reliance", "Bishamber"],
+      icon: "👧"
+    },
+    {
+      id: "eng-12",
+      number: 12,
+      name: "Formal Letter & Analytical Paragraph Writing",
+      unit: "Writing & Grammar Skills",
+      weightage: "10 Marks",
+      tags: ["Letter to Editor", "Complaint", "Data Interpretation", "Trend Analysis"],
+      icon: "📝"
+    }
+  ],
+
+  hindi: [
+    {
+      id: "hin-01",
+      number: 1,
+      name: "नेताजी का चश्मा (स्वयं प्रकाश)",
+      unit: "क्षितिज भाग-2 (गद्य खंड)",
+      weightage: "4-5 Marks",
+      tags: ["हालदार साहब", "कैप्टन चश्मेवाला", "देशभक्ति", "मूर्ति"],
+      icon: "👓"
+    },
+    {
+      id: "hin-02",
+      number: 2,
+      name: "बालगोबिन भगत (रामवृक्ष बेनीपुरी)",
+      unit: "क्षितिज भाग-2 (गद्य खंड)",
+      weightage: "5 Marks",
+      tags: ["कबीरपंथी", "सामाजिक रूढ़ियों का खंडन", "प्रभाती", "पुतोहू"],
+      icon: "🪕"
+    },
+    {
+      id: "hin-03",
+      number: 3,
+      name: "लखनवी अंदाज़ (यशपाल)",
+      unit: "क्षितिज भाग-2 (गद्य खंड)",
+      weightage: "4 Marks",
+      tags: ["नवाब साहब", "व्यंग्य", "दिखावा", "खीरा"],
+      icon: "🥒"
+    },
+    {
+      id: "hin-04",
+      number: 4,
+      name: "पद - सूरदास",
+      unit: "क्षितिज भाग-2 (काव्य खंड)",
+      weightage: "4-5 Marks",
+      tags: ["गोपियाँ", "उद्धव", "भ्रमरगीत", "योग संदेश vs प्रेम"],
+      icon: "🦚"
+    },
+    {
+      id: "hin-05",
+      number: 5,
+      name: "राम-लक्ष्मण-परशुराम संवाद (तुलसीदास)",
+      unit: "क्षितिज भाग-2 (काव्य खंड)",
+      weightage: "5 Marks",
+      tags: ["धनुष भंग", "लक्ष्मण के व्यंग्य", "चौपाई-दोहा", "वीर एवं रौद्र रस"],
+      icon: "🏹"
+    },
+    {
+      id: "hin-06",
+      number: 6,
+      name: "माता का आँचल (शिवपूजन सहाय)",
+      unit: "कृतिका भाग-2",
+      weightage: "4 Marks",
+      tags: ["भोलानाथ", "बाल सुलभ क्रीड़ाएँ", "शिशु-स्नेह", "माँ का ममत्व"],
+      icon: "🤱"
+    },
+    {
+      id: "hin-07",
+      number: 7,
+      name: "साना-साना हाथ जोड़ि (मधु कांकरिया)",
+      unit: "कृतिका भाग-2",
+      weightage: "4-5 Marks",
+      tags: ["सिक्किम यात्रा", "गंतोक", "कटाओ", "प्रकृति की विराटता"],
+      icon: "🏔️"
+    },
+    {
+      id: "hin-08",
+      number: 8,
+      name: "बड़े भाई साहब (प्रेमचंद)",
+      unit: "स्पर्श भाग-2",
+      weightage: "5 Marks",
+      tags: ["अनुभव बनाम किताबी ज्ञान", "कनकौआ", "भाई का उत्तरदायित्व"],
+      icon: "🪁"
+    },
+    {
+      id: "hin-09",
+      number: 9,
+      name: "साखी - कबीरदास",
+      unit: "स्पर्श भाग-2 (पद्य खंड)",
+      weightage: "4 Marks",
+      tags: ["दोहे", "मीठी वाणी", "कस्तूरी मृग", "ईश्वर भक्ति"],
+      icon: "📜"
+    },
+    {
+      id: "hin-10",
+      number: 10,
+      name: "हिंदी व्याकरण (रचना के आधार पर वाक्य, वाच्य, पद-परिचय, रस / मुहावरे)",
+      unit: "व्यावहारिक व्याकरण",
+      weightage: "16 Marks",
+      tags: ["सरल-संयुक्त-मिश्र", "कर्तृ-कर्म-भाववाच्य", "संज्ञा-सर्वनाम परिचय", "रस निष्पत्ति"],
+      icon: "📖"
+    }
   ]
 };
 

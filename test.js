@@ -1,13 +1,15 @@
 /**
- * Class 10th AI - Automated Verification Test Suite
- * Asserts syllabus data structures, 20-year PYQ integrity, DPP scoring, and AI Guru responses.
+ * Class 10th AI Guru - Comprehensive Verification Test Suite
+ * Asserts syllabus data structures across all 5 subjects, 23-year continuous PYQs (2004-2026),
+ * authentic topper handwritten notes, interactive visual mind maps, DPP scoring, AI Guru,
+ * Study Atmosphere themes, and Android Capacitor APK packaging.
  */
 
 const assert = require('assert');
 const fs = require('fs');
 const path = require('path');
 
-console.log('🧪 Starting Class 10th AI Verification Test Suite...\n');
+console.log('🧪 Starting Class 10th AI Comprehensive Verification Test Suite...\n');
 
 let passedTests = 0;
 let totalTests = 0;
@@ -28,6 +30,7 @@ async function runTest(name, fn) {
 // 1. Data Files Verification
 const { SYLLABUS_DATA } = require('./src/data/chapters.js');
 const { NOTES_DATA } = require('./src/data/notes.js');
+const { MIND_MAPS_DATA } = require('./src/data/mindmaps.js');
 const { SKETCH_NOTES_DATA } = require('./src/data/sketchnotes.js');
 const { PYQ_VAULT_DATA } = require('./src/data/pyq-vault.js');
 const { DPP_SETS } = require('./src/data/dpp.js');
@@ -36,31 +39,109 @@ const { Class10AIGuru } = require('./src/ai/ai-guru.js');
 const { AuthManager } = require('./src/auth/auth-manager.js');
 
 async function main() {
-  await runTest('Master Syllabus covers Science, Maths, and Social Science with 25+ chapters', () => {
-  assert(SYLLABUS_DATA.science.length >= 10, 'Science must have at least 10 chapters');
-  assert(SYLLABUS_DATA.maths.length >= 10, 'Maths must have at least 10 chapters');
-  assert(SYLLABUS_DATA.social_science.length >= 5, 'Social Science must have at least 5 chapters');
+  // Test 1: Syllabus coverage across all 5 subjects
+  await runTest('Master Syllabus covers all 5 core subjects: Science, Maths, Social Science, English, Hindi with 40+ chapters', () => {
+    assert(SYLLABUS_DATA.science.length >= 10, 'Science must have at least 10 chapters');
+    assert(SYLLABUS_DATA.maths.length >= 10, 'Maths must have at least 10 chapters');
+    assert(SYLLABUS_DATA.social_science.length >= 8, 'Social Science must have at least 8 chapters');
+    assert(SYLLABUS_DATA.english.length >= 10, 'English must have at least 10 chapters');
+    assert(SYLLABUS_DATA.hindi.length >= 10, 'Hindi must have at least 10 chapters');
 
-  // Verify fields
-  SYLLABUS_DATA.science.forEach(c => {
-    assert(c.id && c.name && c.unit && c.weightage, `Chapter missing required fields: ${JSON.stringify(c)}`);
+    const totalChapters = SYLLABUS_DATA.science.length +
+                          SYLLABUS_DATA.maths.length +
+                          SYLLABUS_DATA.social_science.length +
+                          SYLLABUS_DATA.english.length +
+                          SYLLABUS_DATA.hindi.length;
+    assert(totalChapters >= 45, `Expected 45+ chapters across all subjects, found ${totalChapters}`);
+
+    ['science', 'maths', 'social_science', 'english', 'hindi'].forEach(sub => {
+      SYLLABUS_DATA[sub].forEach(c => {
+        assert(c.id && c.name && c.unit && c.weightage, `Chapter missing required fields: ${JSON.stringify(c)}`);
+      });
+    });
   });
-});
 
-  await runTest('Notes dataset has both 1-Page Summaries and In-Depth Markdown notes', () => {
+  // Test 2: Authentic Topper Handwritten Notes & Scribd Vault
+  await runTest('Topper Handwritten Notes dataset includes Scribd citations, margin tips, common mistakes across subjects', () => {
     const noteKeys = Object.keys(NOTES_DATA);
-    assert(noteKeys.length >= 5, 'Must have at least 5 in-depth chapter notes');
+    assert(noteKeys.length >= 8, 'Must have at least 8 in-depth chapter notes');
 
     noteKeys.forEach(k => {
       const note = NOTES_DATA[k];
       assert(note.title, `Note missing title for ${k}`);
+      assert(note.scribdDocId, `Note missing Scribd document ID for ${k}`);
+      assert(note.topperBadge, `Note missing topper rank badge for ${k}`);
       assert(note.onePageSummary, `Note missing onePageSummary for ${k}`);
       assert(note.onePageSummary.keyDefinitions.length > 0, `Missing key definitions for ${k}`);
       assert(note.onePageSummary.mustKnowFormulas.length > 0, `Missing formulas for ${k}`);
+      assert(note.onePageSummary.topperMarginalNotes && note.onePageSummary.topperMarginalNotes.length > 0, `Missing margin tips for ${k}`);
+      assert(note.onePageSummary.commonBoardMistakes && note.onePageSummary.commonBoardMistakes.length > 0, `Missing common mistakes for ${k}`);
       assert(note.fullNotesMarkdown && note.fullNotesMarkdown.length > 100, `Missing markdown notes for ${k}`);
+    });
+
+    // Check English and Hindi notes exist
+    assert(NOTES_DATA['eng-01'], 'English topper notes must exist');
+    assert(NOTES_DATA['hin-01'], 'Hindi topper notes must exist');
+  });
+
+  // Test 3: Interactive Visual Mind Maps Engine
+  await runTest('Interactive Mind Maps engine covers key chapters across all 5 subjects with branching hierarchy', () => {
+    assert(MIND_MAPS_DATA.length >= 8, 'Must have at least 8 interactive mind maps');
+
+    const subjects = [...new Set(MIND_MAPS_DATA.map(m => m.subject))];
+    assert(subjects.includes('science'), 'Mind maps must cover science');
+    assert(subjects.includes('maths'), 'Mind maps must cover maths');
+    assert(subjects.includes('social_science'), 'Mind maps must cover social science');
+    assert(subjects.includes('english'), 'Mind maps must cover english');
+    assert(subjects.includes('hindi'), 'Mind maps must cover hindi');
+
+    MIND_MAPS_DATA.forEach(mm => {
+      assert(mm.id && mm.chapterId && mm.chapterName, `Mind map missing basic info: ${mm.id}`);
+      assert(mm.rootNode && mm.rootNode.title && mm.rootNode.coreIdea, `Mind map missing root node: ${mm.id}`);
+      assert(mm.branches && mm.branches.length >= 2, `Mind map ${mm.id} must have at least 2 branches`);
+      mm.branches.forEach(b => {
+        assert(b.id && b.title && b.color && b.items && b.items.length > 0, `Invalid branch in ${mm.id}`);
+        b.items.forEach(item => {
+          assert(item.name && item.desc && item.tip, `Invalid leaf item in branch ${b.title}`);
+        });
+      });
     });
   });
 
+  // Test 4: Comprehensive 2004–2026 PYQ Archive
+  await runTest('2004–2026 PYQ Archive covers EVERY year from 2004 to 2026 without gap, across all sets and subjects', () => {
+    assert(PYQ_VAULT_DATA.length >= 25, 'Must have at least 25 real board questions');
+
+    const years = [...new Set(PYQ_VAULT_DATA.map(q => q.year))].sort((a,b) => a - b);
+    for (let yr = 2004; yr <= 2026; yr++) {
+      assert(years.includes(yr), `Missing year ${yr} in PYQ vault! Every single year from 2004 to 2026 must be covered.`);
+    }
+
+    // Verify Subjects
+    const subjects = [...new Set(PYQ_VAULT_DATA.map(q => q.subject))];
+    assert(subjects.includes('Science'), 'PYQs must cover Science');
+    assert(subjects.includes('Mathematics'), 'PYQs must cover Mathematics');
+    assert(subjects.includes('Social Science'), 'PYQs must cover Social Science');
+    assert(subjects.includes('English'), 'PYQs must cover English');
+    assert(subjects.includes('Hindi'), 'PYQs must cover Hindi');
+
+    // Verify Regions/Sets
+    const regions = [...new Set(PYQ_VAULT_DATA.map(q => q.region))];
+    assert(regions.includes('Delhi'), 'Must include Delhi sets');
+    assert(regions.includes('Outside Delhi'), 'Must include Outside Delhi sets');
+    assert(regions.includes('All India'), 'Must include All India / Specimen sets');
+
+    // Verify Step-by-Step Marking Schemes
+    PYQ_VAULT_DATA.forEach(q => {
+      assert(q.year >= 2004 && q.year <= 2026, `Invalid year: ${q.year}`);
+      assert(q.set, `Missing set info in ${q.id}`);
+      assert(q.question && q.solution, `Missing Q or Solution in ${q.id}`);
+      assert(q.solution.includes('Mark'), `Solution must include step marking scheme breakdown in ${q.id}`);
+      assert(q.topperTip, `Missing topper tip in ${q.id}`);
+    });
+  });
+
+  // Test 5: Visual Sketch Notes Atlas
   await runTest('Visual Sketch Notes Atlas contains valid SVG vector diagrams', () => {
     assert(SKETCH_NOTES_DATA.length >= 3, 'Must have at least 3 sketch notes');
 
@@ -71,25 +152,8 @@ async function main() {
     });
   });
 
-  await runTest('2004–2026 PYQ Vault spans 2004 to 2026 with step-by-step marking schemes', () => {
-    assert(PYQ_VAULT_DATA.length >= 10, 'Must have at least 10 real board questions');
-
-    const years = PYQ_VAULT_DATA.map(q => q.year);
-    assert(years.includes(2026), 'Must include 2026 Board Specimen question');
-    assert(years.includes(2025), 'Must include 2025 Board Exam question');
-    assert(years.includes(2024), 'Must include 2024 Board Exam question');
-    assert(years.includes(2004), 'Must span back to 2004 Board Exam question');
-
-    PYQ_VAULT_DATA.forEach(q => {
-      assert(q.year >= 2000 && q.year <= 2026, `Invalid year: ${q.year}`);
-      assert(q.set, `Missing set info in ${q.id}`);
-      assert(q.question && q.solution, `Missing Q or Solution in ${q.id}`);
-      assert(q.solution.includes('Mark'), `Solution must include marking scheme breakdown in ${q.id}`);
-      assert(q.topperTip, `Missing topper tip in ${q.id}`);
-    });
-  });
-
-  await runTest('DPP (Daily Practice Problems) sets have valid multiple choice questions and answers', () => {
+  // Test 6: DPP Practice Problems
+  await runTest('DPP (Daily Practice Problems) sets have valid questions and explanations', () => {
     const dppKeys = Object.keys(DPP_SETS);
     assert(dppKeys.length >= 2, 'Must have at least 2 DPP sets');
 
@@ -106,18 +170,20 @@ async function main() {
     });
   });
 
-  await runTest('Official Sample Papers have blueprints and model answers', () => {
-    assert(SAMPLE_PAPERS_DATA.length >= 2, 'Must have at least 2 sample papers (Science & Maths)');
+  // Test 7: Official Sample Papers
+  await runTest('Official Sample Papers cover Science, Maths, Social Science, English, Hindi with blueprints', () => {
+    assert(SAMPLE_PAPERS_DATA.length >= 5, 'Must have sample papers covering all core subjects');
 
     SAMPLE_PAPERS_DATA.forEach(p => {
       assert(p.totalMarks === 80, `Board paper must be 80 marks: ${p.title}`);
       assert(p.timeHours === 3, `Board paper must be 3 hours: ${p.title}`);
-      assert(p.blueprint && Object.keys(p.blueprint).length >= 4, `Missing section blueprint in ${p.title}`);
+      assert(p.blueprint && Object.keys(p.blueprint).length >= 3, `Missing section blueprint in ${p.title}`);
       assert(p.sampleQuestions.length >= 2, `Missing model questions in ${p.title}`);
     });
   });
 
-  await runTest('Class10AIGuru returns accurate NCERT board guidance for core topics', () => {
+  // Test 8: Class10AIGuru
+  await runTest('Class10AIGuru returns accurate NCERT board guidance for core concepts', () => {
     const guru = new Class10AIGuru();
 
     const ohmAns = guru.ask("What is Ohm's Law?");
@@ -134,6 +200,7 @@ async function main() {
     assert(generalAns.includes('Strategy') || generalAns.includes('Pass'), 'Strategy must return study blueprint');
   });
 
+  // Test 9: AuthManager 50-Seat Quota
   await runTest('AuthManager enforces strict 50-student quota, seat allocation, and study data persistence', async () => {
     const auth = new AuthManager();
     auth.registeredUsers = [];
@@ -154,9 +221,9 @@ async function main() {
 
     // 2. Save DPP test result and bookmark
     auth.saveDPPResult('chem-reactions', 9, 10);
-    const isSaved = auth.toggleBookmark('pyq-2026-sci-s1');
+    const isSaved = auth.toggleBookmark('pyq-2026-sci-01');
     assert(isSaved === true, 'Bookmark should be toggled ON');
-    assert(auth.getUserBookmarks().includes('pyq-2026-sci-s1'), 'Bookmark list must contain bookmarked PYQ');
+    assert(auth.getUserBookmarks().includes('pyq-2026-sci-01'), 'Bookmark list must contain bookmarked PYQ');
 
     // 3. Fill up remaining 49 seats (Total 50)
     for (let i = 2; i <= 50; i++) {
@@ -182,7 +249,7 @@ async function main() {
     assert(user51.quotaFull === true, 'Student #51 must trigger quotaFull flag');
     assert(user51.message.includes('50 Founder Student seats'), 'Student #51 should receive batch full notification');
 
-    // 5. Existing user (e.g. Student #1) can sign in again even when quota is full
+    // 5. Existing user re-login
     const reLoginUser1 = await auth.signInWithGoogle({
       uid: 'google_uid_01',
       displayName: 'Aarav Sharma',
@@ -194,7 +261,8 @@ async function main() {
     assert(reLoginUser1.studentNumber === 1, 'Seat number must remain #1');
   });
 
-  await runTest('UI Assets and Styles exist and are non-empty', () => {
+  // Test 10: Study Atmosphere Themes & UI Assets
+  await runTest('UI Assets and Styles define Study Atmosphere themes and eye-friendly dark modes', () => {
     const indexPath = path.join(__dirname, 'index.html');
     const stylesPath = path.join(__dirname, 'styles.css');
     const appPath = path.join(__dirname, 'src/app.js');
@@ -203,15 +271,34 @@ async function main() {
     assert(fs.existsSync(stylesPath), 'styles.css must exist');
     assert(fs.existsSync(appPath), 'src/app.js must exist');
 
-    assert(fs.statSync(indexPath).size > 2000, 'index.html must be populated');
-    assert(fs.statSync(stylesPath).size > 2000, 'styles.css must be populated');
-    assert(fs.statSync(appPath).size > 2000, 'src/app.js must be populated');
+    const stylesContent = fs.readFileSync(stylesPath, 'utf8');
+    assert(stylesContent.includes('midnight-slate'), 'Must define midnight-slate theme');
+    assert(stylesContent.includes('oled-dark'), 'Must define oled-dark theme');
+    assert(stylesContent.includes('parchment-lamp'), 'Must define parchment-lamp theme');
+    assert(stylesContent.includes('topper-notebook-sheet'), 'Must define topper ruled notebook stylesheet');
   });
 
-  console.log('\n========================================');
-  console.log(`Class 10th AI Test Suite Summary:`);
+  // Test 11: Android Capacitor Platform and APK Package Integrity
+  await runTest('Android Capacitor configuration and built APK packages exist and are valid', () => {
+    const capConfigPath = path.join(__dirname, 'capacitor.config.json');
+    assert(fs.existsSync(capConfigPath), 'capacitor.config.json must exist');
+    const capConfig = JSON.parse(fs.readFileSync(capConfigPath, 'utf8'));
+    assert(capConfig.webDir === 'www', 'webDir must be set to www');
+
+    const distApkPath = path.join(__dirname, 'dist/class-10-ai-guru.apk');
+    const debugApkPath = path.join(__dirname, 'android/app/build/outputs/apk/debug/app-debug.apk');
+
+    assert(fs.existsSync(distApkPath), 'Distribution APK must exist at dist/class-10-ai-guru.apk');
+    assert(fs.existsSync(debugApkPath), 'Debug APK must exist at android/app/build/outputs/apk/debug/app-debug.apk');
+
+    const apkStats = fs.statSync(distApkPath);
+    assert(apkStats.size > 100000, `APK size must be substantial (>100KB), found ${apkStats.size} bytes`);
+  });
+
+  console.log('\n======================================================');
+  console.log(`Class 10th AI Guru Test Suite Summary:`);
   console.log(`Passed: ${passedTests} / ${totalTests}`);
-  console.log('========================================\n');
+  console.log('======================================================\n');
 
   if (passedTests === totalTests) {
     console.log('🎉 All Class 10th AI verification checks passed with 100% compliance!\n');

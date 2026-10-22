@@ -1,21 +1,21 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="midnight-slate">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-  <title>Class 10 AI Guru — CBSE Exam Prep Suite (2004–2026 PYQs, Notes, DPP & 50-Seat Google Auth)</title>
-  <meta name="description" content="Android-ready Class 10 CBSE Board Exam preparation app. Features 2004-2026 PYQs, 1-page notes, visual sketch notes, daily practice problems (DPP), and 50-student Google Firebase enrollment.">
+  <title>Class 10 AI Guru — 2004–2026 Solved PYQ Vault, Topper Handwritten Notes & Mind Maps</title>
+  <meta name="description" content="Ultimate Class 10 CBSE Board Exam preparation app. Features complete 2004-2026 PYQs with step-by-step marking schemes, authentic topper handwritten notes from Scribd archives, interactive mind maps, visual diagrams, and 50-student Google Auth.">
   <link rel="stylesheet" href="styles.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@600;700&family=Patrick+Hand&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
 
   <!-- Top AppBar (Android & Desktop) -->
   <header class="app-bar">
     <div class="app-container app-bar-inner">
-      <div style="display: flex; align-items: center; gap: 0.85rem;">
+      <div style="display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;">
         <a href="#" class="brand-section">
           <div class="brand-icon-box">🎓</div>
           <div class="brand-meta">
@@ -23,6 +23,22 @@
             <span>CBSE 2004–2026 Edition</span>
           </div>
         </a>
+
+        <!-- Study Atmosphere & Focus Controls -->
+        <div class="study-controls">
+          <!-- Focus Pomodoro Timer -->
+          <div class="timer-pill" id="focusTimerPill" title="Board Focus Study Timer (25m)">
+            <span class="timer-btn-icon" id="timerIcon">▶</span>
+            <span id="timerDisplay">25:00</span>
+          </div>
+
+          <!-- Theme Selector (Less White-Coded) -->
+          <select id="studyThemeSelect" class="theme-dropdown" title="Select Study Atmosphere">
+            <option value="midnight-slate">🌙 Midnight Slate</option>
+            <option value="oled-dark">⚫ OLED Pure Dark</option>
+            <option value="parchment-lamp">🕯️ Study Lamp</option>
+          </select>
+        </div>
 
         <!-- 50-Student Quota Pill -->
         <div class="quota-pill" title="Limited to the first 50 founder students">
@@ -44,8 +60,8 @@
     <!-- Top Banner Summary -->
     <div class="app-banner">
       <div class="banner-content">
-        <h2>Your Pocket Class 10 Board Companion</h2>
-        <p>Complete CBSE exam preparation: 2004–2026 PYQ Vault with step marking, 1-page notes, visual diagrams, and real-time AI doubt solving.</p>
+        <h2>CBSE Class 10 Topper Hub & 2004–2026 Vault</h2>
+        <p>Authentic CBSE topper handwritten manuscripts, Scribd study sheets, complete 23-year solved PYQ archive with step-by-step marking schemes, and interactive visual mind maps.</p>
       </div>
       <div class="banner-stats">
         <div class="banner-stat-box">
@@ -53,8 +69,12 @@
           <div class="stat-title">PYQ Span</div>
         </div>
         <div class="banner-stat-box">
-          <div class="stat-number">35+</div>
-          <div class="stat-title">Chapters</div>
+          <div class="stat-number">All 5</div>
+          <div class="stat-title">Subjects</div>
+        </div>
+        <div class="banner-stat-box">
+          <div class="stat-number">100/100</div>
+          <div class="stat-title">Topper Notes</div>
         </div>
         <div class="banner-stat-box">
           <div class="stat-number">50</div>
@@ -70,64 +90,99 @@
         <button class="btn-subject" data-subject="science">🧪 Science</button>
         <button class="btn-subject" data-subject="maths">📐 Maths</button>
         <button class="btn-subject" data-subject="social_science">🏛️ Social Science</button>
+        <button class="btn-subject" data-subject="english">📖 English</button>
+        <button class="btn-subject" data-subject="hindi">🪶 Hindi</button>
       </div>
 
       <div class="search-input-wrap">
         <span class="search-input-icon">🔍</span>
-        <input type="text" id="globalSearchInput" placeholder="Search chapters, formulas, concepts...">
+        <input type="text" id="globalSearchInput" placeholder="Search chapters, formulas, PYQs, mind maps...">
       </div>
     </div>
 
     <!-- Desktop Navigation Tabs -->
     <nav class="desktop-tabs">
-      <button class="tab-btn active" data-target="notesSection">📚 Chapter Notes</button>
+      <button class="tab-btn active" data-target="notesSection">📝 Topper Handwritten Notes</button>
+      <button class="tab-btn" data-target="mindMapSection">🧠 Interactive Mind Maps</button>
+      <button class="tab-btn" data-target="pyqSection">🏆 2004–2026 PYQs & Solutions</button>
       <button class="tab-btn" data-target="sketchNotesSection">🎨 Visual Sketch Notes</button>
-      <button class="tab-btn" data-target="pyqSection">🏆 2004–2026 PYQs</button>
       <button class="tab-btn" data-target="dppSection">📝 DPP Tests</button>
       <button class="tab-btn" data-target="papersSection">📑 Sample Papers</button>
       <button class="tab-btn" data-target="guruSection">🤖 AI Guru Chat</button>
     </nav>
 
-    <!-- Tab 1: Chapter Notes -->
+    <!-- Tab 1: Authentic Topper Handwritten Notes -->
     <section class="app-section active" id="notesSection">
+      <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <h3 style="color: #fff; font-size: 1.25rem;">📝 Authentic Topper Handwritten Manuscripts</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Curated from CBSE 100/100 Topper Answer Sheets and Scribd Archives with margin secrets and examiner checklists.</p>
+        </div>
+      </div>
       <div class="card-grid" id="notesContainer">
         <!-- Rendered dynamically -->
       </div>
     </section>
 
-    <!-- Tab 2: Visual Sketch Notes -->
-    <section class="app-section" id="sketchNotesSection">
-      <div style="margin-bottom: 1rem;">
-        <h3 style="color: #fff; font-size: 1.25rem;">🎨 Visual Concept Sketch Notes</h3>
-        <p style="color: var(--text-muted); font-size: 0.85rem;">Clear vector SVG anatomical and ray diagrams designed for rapid memory recall.</p>
+    <!-- Tab 2: Interactive Visual Mind Maps -->
+    <section class="app-section" id="mindMapSection">
+      <div style="margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+        <div>
+          <h3 style="color: #fff; font-size: 1.25rem;">🧠 Interactive Visual Mind Maps</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">Hierarchical concept structures, formulas, and high-yield board memory anchors.</p>
+        </div>
+        <div style="display: flex; gap: 0.5rem;">
+          <select id="mindMapChapterSelect" class="select-clean">
+            <!-- Populated dynamically -->
+          </select>
+        </div>
       </div>
-      <div class="card-grid" id="sketchNotesContainer">
+      <div id="mindMapContainer">
         <!-- Rendered dynamically -->
       </div>
     </section>
 
-    <!-- Tab 3: 2004–2026 PYQ Vault -->
+    <!-- Tab 3: 2004–2026 PYQ Vault & Dedicated Solutions Hub -->
     <section class="app-section" id="pyqSection">
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; flex-wrap: wrap; gap: 0.75rem;">
         <div>
-          <h3 style="color: #fff; font-size: 1.25rem;">🏆 2004–2026 Solved Board PYQs</h3>
-          <p style="color: var(--text-muted); font-size: 0.85rem;">CBSE Delhi, All India, and 2026 Specimen sets with official step-by-step marking schemes.</p>
+          <h3 style="color: #fff; font-size: 1.25rem;">🏆 2004–2026 Comprehensive Solved Board PYQs</h3>
+          <p style="color: var(--text-muted); font-size: 0.85rem;">All 23 continuous years (2004-2026), Delhi, Outside Delhi & Foreign sets with step-by-step marking schemes.</p>
         </div>
 
-        <div class="pyq-filter-bar">
+        <div class="pyq-filter-bar" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
           <select id="pyqYearFilter" class="select-clean">
             <option value="all">📅 All Years (2004-2026)</option>
-            <option value="2026">2026 Specimen / Model</option>
+            <option value="2026">2026 Specimen Set</option>
             <option value="2025">2025 Board Set</option>
             <option value="2024">2024 Board Set</option>
             <option value="2023">2023 Board Set</option>
-            <option value="2022">2022 Board Set</option>
+            <option value="2022">2022 Term Sets</option>
+            <option value="2021">2021 Special Set</option>
             <option value="2020">2020 Board Set</option>
+            <option value="2019">2019 Board Set</option>
             <option value="2018">2018 Board Set</option>
+            <option value="2017">2017 Board Set</option>
+            <option value="2016">2016 Board Set</option>
             <option value="2015">2015 Board Set</option>
+            <option value="2014">2014 Board Set</option>
+            <option value="2013">2013 Board Set</option>
             <option value="2012">2012 Board Set</option>
+            <option value="2011">2011 Board Set</option>
+            <option value="2010">2010 Board Set</option>
+            <option value="2009">2009 Board Set</option>
             <option value="2008">2008 Board Set</option>
+            <option value="2007">2007 Board Set</option>
+            <option value="2006">2006 Board Set</option>
+            <option value="2005">2005 Board Set</option>
             <option value="2004">2004 Board Set</option>
+          </select>
+
+          <select id="pyqRegionFilter" class="select-clean">
+            <option value="all">🌐 All Regions / Sets</option>
+            <option value="Delhi">Delhi Sets</option>
+            <option value="Outside Delhi">Outside Delhi / All India</option>
+            <option value="All India">National / Foreign Sets</option>
           </select>
 
           <select id="pyqMarksFilter" class="select-clean">
@@ -144,25 +199,36 @@
       </div>
     </section>
 
-    <!-- Tab 4: DPP Tests -->
+    <!-- Tab 4: Visual Sketch Notes -->
+    <section class="app-section" id="sketchNotesSection">
+      <div style="margin-bottom: 1rem;">
+        <h3 style="color: #fff; font-size: 1.25rem;">🎨 Visual Concept Sketch Notes</h3>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Clear vector SVG anatomical, ray, and circuit diagrams designed for rapid board memory recall.</p>
+      </div>
+      <div class="card-grid" id="sketchNotesContainer">
+        <!-- Rendered dynamically -->
+      </div>
+    </section>
+
+    <!-- Tab 5: DPP Tests -->
     <section class="app-section" id="dppSection">
       <div id="dppContainer">
         <!-- Rendered dynamically -->
       </div>
     </section>
 
-    <!-- Tab 5: Sample Papers -->
+    <!-- Tab 6: Sample Papers -->
     <section class="app-section" id="papersSection">
       <div style="margin-bottom: 1rem;">
         <h3 style="color: #fff; font-size: 1.25rem;">📑 Model Question Papers & Blueprints</h3>
-        <p style="color: var(--text-muted); font-size: 0.85rem;">Full 80-mark mock paper blueprints with model step-by-step solutions.</p>
+        <p style="color: var(--text-muted); font-size: 0.85rem;">Full 80-mark mock paper blueprints with model step-by-step solutions for Science, Maths, Social Science, English, and Hindi.</p>
       </div>
       <div id="papersContainer" style="display: flex; flex-direction: column; gap: 1.25rem;">
         <!-- Rendered dynamically -->
       </div>
     </section>
 
-    <!-- Tab 6: AI Guru Chat -->
+    <!-- Tab 7: AI Guru Chat -->
     <section class="app-section" id="guruSection">
       <div style="max-width: 800px; margin: 0 auto;">
         <div style="text-align: center; margin-bottom: 1rem;">
@@ -181,11 +247,11 @@
         <div class="guru-chat-shell">
           <div class="chat-history" id="aiChatMessages">
             <div class="bubble guru">
-              Hello! I am your <strong>Class 10 AI Guru</strong>. I have indexed the entire NCERT syllabus, formulas, and 2004–2026 PYQs. What concept would you like to master today?
+              Hello! I am your <strong>Class 10 AI Guru</strong>. I have indexed the entire NCERT syllabus, 2004–2026 PYQs, topper handwritten manuscripts, and mind maps. What concept would you like to master today?
             </div>
           </div>
           <div class="chat-bar">
-            <input type="text" id="aiChatInput" placeholder="Ask a doubt (e.g. 'explain nephron', 'derive mirror formula')...">
+            <input type="text" id="aiChatInput" placeholder="Ask a doubt (e.g. 'explain nephron', 'derive mirror formula', 'BPT theorem')...">
             <button class="btn-primary" id="aiSendBtn">Send →</button>
           </div>
         </div>
@@ -197,20 +263,20 @@
   <!-- Mobile Bottom Navigation Bar (Android Native Feel) -->
   <nav class="bottom-nav">
     <button class="bottom-nav-item active" data-target="notesSection">
-      <span class="nav-icon">📚</span>
+      <span class="nav-icon">📝</span>
       <span>Notes</span>
     </button>
-    <button class="bottom-nav-item" data-target="sketchNotesSection">
-      <span class="nav-icon">🎨</span>
-      <span>Sketch</span>
+    <button class="bottom-nav-item" data-target="mindMapSection">
+      <span class="nav-icon">🧠</span>
+      <span>Mind Maps</span>
     </button>
     <button class="bottom-nav-item" data-target="pyqSection">
       <span class="nav-icon">🏆</span>
       <span>PYQs</span>
     </button>
-    <button class="bottom-nav-item" data-target="dppSection">
-      <span class="nav-icon">📝</span>
-      <span>DPP</span>
+    <button class="bottom-nav-item" data-target="sketchNotesSection">
+      <span class="nav-icon">🎨</span>
+      <span>Sketch</span>
     </button>
     <button class="bottom-nav-item" data-target="guruSection">
       <span class="nav-icon">🤖</span>
@@ -218,7 +284,7 @@
     </button>
   </nav>
 
-  <!-- Note Modal -->
+  <!-- Note Modal (Topper Ruled Manuscript Viewer) -->
   <div class="app-modal" id="noteModal">
     <div class="modal-dialog">
       <div class="modal-head">
@@ -243,6 +309,7 @@
   <!-- Scripts -->
   <script src="src/data/chapters.js"></script>
   <script src="src/data/notes.js"></script>
+  <script src="src/data/mindmaps.js"></script>
   <script src="src/data/sketchnotes.js"></script>
   <script src="src/data/pyq-vault.js"></script>
   <script src="src/data/dpp.js"></script>

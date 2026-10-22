@@ -5,6 +5,8 @@
   "main": "src/app.js",
   "scripts": {
     "test": "node test.js",
+    "build": "node scripts/build.js",
+    "build:apk": "node scripts/build-apk.js",
     "cap:add": "cap add android",
     "cap:sync": "cap sync android",
     "cap:open": "cap open android"
