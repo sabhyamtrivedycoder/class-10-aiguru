@@ -11,6 +11,8 @@ permissions:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    env:
+      ANDROID_HOME: /usr/local/lib/android/sdk
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -21,16 +23,13 @@ jobs:
           distribution: 'temurin'
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
           cache: 'npm'
 
-      - name: Install NPM Dependencies
+      - name: Install Dependencies
         run: npm install
 
       - name: Build Web Application
@@ -39,28 +38,30 @@ jobs:
       - name: Sync Capacitor Android
         run: npx cap sync android
 
-      - name: Build Native Debug APK with Gradle
+      - name: Accept Android SDK Licenses & Build APK
         working-directory: android
         run: |
+          yes | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager --licenses || true
           chmod +x ./gradlew
           ./gradlew assembleDebug --stacktrace
 
-      - name: Verify Built APK
+      - name: Verify APK Output
         run: |
           ls -lh android/app/build/outputs/apk/debug/app-debug.apk
-          cp android/app/build/outputs/apk/debug/app-debug.apk class-10-ai-guru-official.apk
+          cp android/app/build/outputs/apk/debug/app-debug.apk class-10-ai-guru-v1.0.apk
+          echo "APK_SIZE=$(stat -c%s class-10-ai-guru-v1.0.apk)" >> $GITHUB_ENV
 
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: class-10-ai-guru-official-apk
-          path: class-10-ai-guru-official.apk
+          name: class-10-ai-guru-v1.0-apk
+          path: class-10-ai-guru-v1.0.apk
 
-      - name: Publish APK to GitHub Release v1.0.0
+      - name: Update GitHub Release v1.0.0
         uses: softprops/action-gh-release@v2
         if: always()
         with:
           tag_name: v1.0.0
-          files: class-10-ai-guru-official.apk
+          files: class-10-ai-guru-v1.0.apk
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
