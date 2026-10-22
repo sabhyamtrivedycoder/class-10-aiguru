@@ -1,0 +1,26 @@
+{
+  "name": "Class 10 AI Guru",
+  "short_name": "Class10Guru",
+  "description": "All-in-One Class 10 NCERT & CBSE Board Exam Preparation Platform with 2004-2026 PYQ Vault, Handwritten Notes, Mind Maps, and Dark Study Atmosphere",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#070d18",
+  "theme_color": "#070d18",
+  "icons": [
+    {
+      "src": "./assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["education", "books", "productivity"],
+  "lang": "en-IN"
+}

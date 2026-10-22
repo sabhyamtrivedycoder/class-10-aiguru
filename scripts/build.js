@@ -38,6 +38,12 @@ function build() {
   // Copy root web files
   fs.copyFileSync(path.join(rootDir, 'index.html'), path.join(wwwDir, 'index.html'));
   fs.copyFileSync(path.join(rootDir, 'styles.css'), path.join(wwwDir, 'styles.css'));
+  if (fs.existsSync(path.join(rootDir, 'manifest.json'))) {
+    fs.copyFileSync(path.join(rootDir, 'manifest.json'), path.join(wwwDir, 'manifest.json'));
+  }
+  if (fs.existsSync(path.join(rootDir, 'sw.js'))) {
+    fs.copyFileSync(path.join(rootDir, 'sw.js'), path.join(wwwDir, 'sw.js'));
+  }
 
   // Copy directories
   copyDirSync(path.join(rootDir, 'src'), path.join(wwwDir, 'src'));
